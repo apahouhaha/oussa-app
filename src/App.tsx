@@ -134,19 +134,31 @@ export default function App() {
     setUser(null)
   }
 
-  const toggleLike = (barId: number) => {
-    setLikes((prev) => {
-      const newLikes = { ...prev }
-      newLikes[barId] = !newLikes[barId]
-      return newLikes
-    })
-    setLikeCount((prev) => {
-      const newCount = { ...prev }
-      newCount[barId] = (newCount[barId] || 0) + (likes[barId] ? -1 : 1)
-      localStorage.setItem(`bar_likes_${barId}`, String(newCount[barId]))
-      return newCount
-    })
+  const toggleLike = (barId: number, clickX?: number, clickY?: number) => {
+  const newLiked = !likes[barId]
+  
+  setLikes((prev) => {
+    const newLikes = { ...prev }
+    newLikes[barId] = newLiked
+    return newLikes
+  })
+  
+  setLikeCount((prev) => {
+    const newCount = { ...prev }
+    newCount[barId] = (newCount[barId] || 0) + (newLiked ? 1 : -1)
+    localStorage.setItem(`bar_likes_${barId}`, String(newCount[barId]))
+    return newCount
+  })
+
+  // ===== ANIMATION COEUR SPECTACULAIRE =====
+  if (newLiked && clickX && clickY) {
+    createHearts(clickX, clickY)
   }
+}
+Voilà! Ensuite fais le push et test! 💪
+
+
+
 
   const toggleBarLike = (barId: number) => {
     setBarLikes((prev) => {
