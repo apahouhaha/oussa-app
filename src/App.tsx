@@ -155,7 +155,6 @@ export default function App() {
     createHearts(clickX, clickY)
   }
 }
-Voilà! Ensuite fais le push et test! 💪
 
 
 
