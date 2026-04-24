@@ -114,10 +114,8 @@ export default function App() {
         {activeTab === 'home' && (
           <div>
             {BARS.map((bar) => (
-              <div key={bar.id} style={{ backgroundColor: '#1a1a1a', borderRadius: '12px', overflow: 'hidden', marginBottom: '24px', border: '1px solid #333' }}>
-                
-                {/* HEADER: Avatar + Info + Promo Badge */}
-                <div style={{ display: 'flex', alignItems: 'flex-start', padding: '16px', borderBottom: '1px solid #333', position: 'relative' }}>
+              <div key={bar.id} style={{ backgroundColor: '#1a1a1a', borderRadius: '16px', overflow: 'hidden', marginBottom: '20px', border: '2px solid #FF6B35', boxShadow: '0 8px 24px rgba(0, 0, 0, 0.6)' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', padding: '16px', borderBottom: '1px solid #333', backgroundColor: '#0d1117' }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flex: 1 }}>
                     <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#FF6B35', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', cursor: 'pointer', flexShrink: 0, overflow: 'hidden' }} onClick={() => handlePhotoUpload(bar.id, 'profile')}>
                       {barPhotos[bar.id]?.profile ? <img src={barPhotos[bar.id].profile} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : bar.emoji}
@@ -128,31 +126,27 @@ export default function App() {
                       <div style={{ fontSize: '11px', color: '#666' }}>📍 {bar.location}</div>
                     </div>
                   </div>
-
-                  <div style={{ backgroundColor: '#FFD700', color: '#000', padding: '6px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold', whiteSpace: 'nowrap', marginLeft: '12px', textAlign: 'center' }}>
+                  <div style={{ backgroundColor: '#FFD700', color: '#000', padding: '8px 12px', borderRadius: '8px', fontSize: '11px', fontWeight: 'bold', whiteSpace: 'nowrap', marginLeft: '12px', textAlign: 'center', boxShadow: '0 4px 12px rgba(255, 215, 0, 0.3)' }}>
                     <div>Offre spéciale</div>
                     <div style={{ fontSize: '10px', fontWeight: 'normal' }}>OUSSA</div>
                     <div style={{ fontSize: '10px', fontWeight: 'normal', marginTop: '2px' }}>2h restantes</div>
                   </div>
                 </div>
 
-                {/* TAGS */}
-                <div style={{ padding: '8px 16px', display: 'flex', gap: '8px', flexWrap: 'wrap', borderBottom: '1px solid #333', backgroundColor: '#0d1117' }}>
+                <div style={{ padding: '12px 16px', display: 'flex', gap: '8px', flexWrap: 'wrap', borderBottom: '1px solid #333', backgroundColor: '#0d1117' }}>
                   {bar.tags.map((tag) => (
-                    <div key={tag} style={{ backgroundColor: '#FF00FF', color: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold' }}>
+                    <div key={tag} style={{ backgroundColor: '#FF6B35', color: 'white', padding: '6px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold' }}>
                       {tag}
                     </div>
                   ))}
                 </div>
 
-                {/* POST IMAGE */}
-                <div style={{ width: '100%', height: '280px', backgroundColor: '#2a2a2a', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '16px', textAlign: 'center', fontSize: '12px', color: '#666', overflow: 'hidden' }} onClick={() => handlePhotoUpload(bar.id, 'post')}>
+                <div style={{ width: '100%', height: '280px', backgroundColor: '#2a2a2a', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', textAlign: 'center', fontSize: '12px', color: '#666', overflow: 'hidden', borderTop: '3px solid #FF6B35' }} onClick={() => handlePhotoUpload(bar.id, 'post')}>
                   {barPhotos[bar.id]?.post ? <img src={barPhotos[bar.id].post} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : '📸 Clic pour ajouter'}
                 </div>
 
-                {/* DESCRIPTION */}
-                <div style={{ padding: '16px', borderBottom: '1px solid #333' }}>
-                  <div style={{ fontSize: '14px', lineHeight: '1.4', marginBottom: '12px', color: '#e0e0e0' }}>
+                <div style={{ padding: '16px', borderBottom: '1px solid #333', backgroundColor: '#0d1117' }}>
+                  <div style={{ fontSize: '14px', lineHeight: '1.5', color: '#e0e0e0' }}>
                     {bar.id === 1 && '2 menus adulte achetés = 1 menu enfant offert 🎁'}
                     {bar.id === 2 && 'Happy hour 17h-19h: -30% sur les bières 🍻'}
                     {bar.id === 3 && 'Terrasse disponible maintenant! ☀️'}
@@ -165,28 +159,17 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* TYPE + RATING + TIME + LIKE BUTTON */}
-                <div style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#0d1117', gap: '12px', flexWrap: 'wrap' }}>
+                <div style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#0d1117', gap: '12px', flexWrap: 'wrap' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ backgroundColor: '#0066FF', color: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold' }}>
+                    <div style={{ backgroundColor: '#0066FF', color: 'white', padding: '6px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold' }}>
                       {bar.type}
                     </div>
                     <div style={{ fontSize: '12px', color: '#888' }}>⭐ {bar.rating}</div>
                   </div>
-
-                  <div style={{ fontSize: '11px', color: '#666' }}>
-                    {formatTime()}
-                  </div>
-
-                  <button onClick={() => toggleLike(bar.id)} style={{ padding: '6px 12px', backgroundColor: likes[bar.id] ? '#FF6B35' : '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <div style={{ fontSize: '11px', color: '#666' }}>{formatTime()}</div>
+                  <button onClick={() => toggleLike(bar.id)} style={{ padding: '8px 14px', backgroundColor: likes[bar.id] ? '#FF6B35' : '#333', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s' }}>
                     {likes[bar.id] ? '❤️' : '🤍'} {likeCount[bar.id] || 0}
                   </button>
-                </div>
-
-                {/* UPLOAD BUTTONS */}
-                <div style={{ padding: '12px 16px', display: 'flex', gap: '8px' }}>
-                  <button style={{ flex: 1, padding: '8px 12px', backgroundColor: '#FF6B35', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }} onClick={() => handlePhotoUpload(bar.id, 'profile')}>📷 Photo profil</button>
-                  <button style={{ flex: 1, padding: '8px 12px', backgroundColor: '#FF6B35', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }} onClick={() => handlePhotoUpload(bar.id, 'post')}>📸 Photo post</button>
                 </div>
               </div>
             ))}
@@ -194,7 +177,7 @@ export default function App() {
         )}
 
         {activeTab === 'profile' && (
-          <div style={{ backgroundColor: '#1a1a1a', padding: '24px', borderRadius: '8px', textAlign: 'center' }}>
+          <div style={{ backgroundColor: '#1a1a1a', padding: '24px', borderRadius: '12px', textAlign: 'center', border: '2px solid #FF6B35', boxShadow: '0 8px 24px rgba(0, 0, 0, 0.6)' }}>
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>👤</div>
             <p style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>{email.split('@')[0]}</p>
             <p style={{ fontSize: '12px', color: '#888', marginBottom: '24px' }}>{email}</p>
@@ -205,7 +188,7 @@ export default function App() {
 
       <input ref={fileInputRef} type="file" accept="image/*" onChange={processPhotoUpload} style={{ display: 'none' }} />
 
-      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#161b22', borderTop: '1px solid #333', display: 'flex', justifyContent: 'space-around', zIndex: 100 }}>
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#161b22', borderTop: '2px solid #FF6B35', display: 'flex', justifyContent: 'space-around', zIndex: 100 }}>
         <div style={{ flex: 1, padding: '16px 8px', textAlign: 'center', color: activeTab === 'home' ? '#FF6B35' : '#888', cursor: 'pointer', fontSize: '12px' }} onClick={() => setActiveTab('home')}>
           <div style={{ fontSize: '24px', marginBottom: '4px' }}>🏠</div><div>Accueil</div>
         </div>
