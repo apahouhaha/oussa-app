@@ -20,6 +20,41 @@ const heartAnimationStyle = `
   .heart-animation {
     animation: heartPulse 0.6s ease-in-out;
   }
+
+  @keyframes confetti-fall {
+    0% {
+      transform: translateY(0) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(600px) rotate(720deg);
+      opacity: 0;
+    }
+  }
+
+  @keyframes heart-float {
+    0% {
+      transform: translateY(0) translateX(0) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-400px) translateX(var(--tx, 0)) scale(0);
+      opacity: 0;
+    }
+  }
+
+  .confetti {
+    position: fixed;
+    pointer-events: none;
+    animation: confetti-fall 2.5s ease-in forwards;
+  }
+
+  .floating-heart {
+    position: fixed;
+    pointer-events: none;
+    font-size: 32px;
+    animation: heart-float 2s ease-out forwards;
+  }
 `
 
 // Injecter les styles
@@ -151,6 +186,7 @@ export default function App() {
   const [codeVerified, setCodeVerified] = useState(false)
   const [barLikes, setBarLikes] = useState<{ [key: number]: boolean }>({})
   const [barLikeCount, setBarLikeCount] = useState<{ [key: number]: number }>({})
+  const [showCelebration, setShowCelebration] = useState(false)
 
   useEffect(() => {
     const likesCounts: { [key: number]: number } = {}
@@ -233,8 +269,12 @@ export default function App() {
   }
 
   const completeOffer = () => {
-    alert('✅ Tu as gagné 25 points!')
-    closeModal()
+    // Afficher l'animation au lieu de l'alert
+    setShowCelebration(true)
+    setTimeout(() => {
+      setShowCelebration(false)
+      closeModal()
+    }, 3000)
   }
 
   const closeModal = () => {
@@ -600,7 +640,77 @@ export default function App() {
         </div>
       )}
 
-      {/* BOTTOM NAV */}
+      {/* CELEBRATION ANIMATION - Confettis + Coeurs */}
+      {showCelebration && (
+        <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 2000 }}>
+          {/* Confettis */}
+          {[...Array(30)].map((_, i) => (
+            <div
+              key={`confetti-${i}`}
+              className="confetti"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: '-10px',
+                width: '10px',
+                height: '10px',
+                backgroundColor: ['#FF6B35', '#FFD700', '#00aa00', '#FF1493', '#00CED1'][i % 5],
+                borderRadius: Math.random() > 0.5 ? '50%' : '2px',
+                animationDelay: `${i * 0.05}s`,
+              }}
+            />
+          ))}
+
+          {/* Coeurs volants */}
+          {[...Array(12)].map((_, i) => (
+            <div
+              key={`heart-${i}`}
+              className="floating-heart"
+              style={{
+                left: '50%',
+                top: '50%',
+                '--tx': `${(Math.random() - 0.5) * 400}px`,
+                animationDelay: `${i * 0.1}s`,
+                marginLeft: '-16px',
+              }}
+            >
+              ❤️
+            </div>
+          ))}
+
+          {/* Message de célébration */}
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            backgroundColor: '#FF6B35',
+            color: 'white',
+            padding: '24px 48px',
+            borderRadius: '12px',
+            fontSize: '18px',
+            fontWeight: '700',
+            textAlign: 'center',
+            zIndex: 2001,
+            boxShadow: '0 10px 40px rgba(255, 107, 53, 0.4)',
+            animation: 'fadeInScale 0.5s ease-out',
+          }}>
+            ✅ Tu as gagné 25 points!
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes fadeInScale {
+          0% {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.8);
+          }
+          100% {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+          }
+        }
+      `}</style>
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#ffffff', borderTop: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-around', zIndex: 100 }}>
         <button onClick={() => setActiveTab('home')} style={{ flex: 1, padding: '16px', textAlign: 'center', color: activeTab === 'home' ? '#FF6B35' : '#999', backgroundColor: 'transparent', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: '600', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', transition: 'color 0.2s' }}>
           <span style={{ fontSize: '20px' }}>🏠</span>Accueil
