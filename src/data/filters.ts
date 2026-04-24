@@ -5,6 +5,7 @@ export type Filter = {
 }
 
 export const FILTERS: Filter[] = [
+  { id: 'offers', emoji: '🎁', label: 'Offres' },
   { id: 'open', emoji: '⏰', label: 'Ouvert' },
   { id: 'nearby', emoji: '📍', label: '< 500m' },
   { id: 'terrasse', emoji: '☀️', label: 'Terrasse' },
@@ -12,7 +13,6 @@ export const FILTERS: Filter[] = [
   { id: 'parking', emoji: '🅿️', label: 'Parking' },
   { id: 'metro', emoji: '🚇', label: 'Métro-Tram' },
   { id: 'takeaway', emoji: '🚚', label: 'À emporter' },
-  { id: 'offers', emoji: '🎁', label: 'Offres' },
   { id: 'happyhour', emoji: '🍹', label: 'Happy Hour' },
   { id: 'pets', emoji: '🐕', label: 'Pet friendly' },
   { id: 'games', emoji: '🎲', label: 'Jeux' },

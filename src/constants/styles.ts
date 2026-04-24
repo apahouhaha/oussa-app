@@ -1,108 +1,165 @@
-// DESIGN TOKENS
 export const COLORS = {
-  primary: '#FF6B35',    // Orange
-  secondary: '#2C3E50',  // Gris foncé
-  accent: '#FFD700',     // Or
-  white: '#ffffff',
-  bgLight: '#f5f5f5',
-  bgLighter: '#f9f9f9',
-  textDark: '#1a1a1a',
-  textMid: '#666',
-  textLight: '#999',
-  error: '#ff4444',
-  success: '#00aa00',
+  primary: '#FF6B35',
+  secondary: '#2C3E50',
+  accent: '#FFD700',
+  background: '#ffffff',
+  text: '#333',
+  lightBg: '#f5f5f5',
+  border: '#e0e0e0',
 }
 
-// ANIMATIONS CSS (à injecter dans <style> tag)
-export const ANIMATIONS_CSS = `
-  @keyframes heartPulse {
-    0% { transform: scale(1); }
-    25% { transform: scale(1.3); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
-  }
-
-  @keyframes confetti-fall {
+export const ANIMATIONS = `
+  @keyframes floatHearts {
     0% {
-      transform: translateY(0) rotate(0deg);
       opacity: 1;
+      transform: translateY(0) scale(1);
     }
     100% {
-      transform: translateY(600px) rotate(720deg);
       opacity: 0;
+      transform: translateY(-100vh) scale(0.5);
     }
   }
 
-  @keyframes heart-float {
-    0% {
-      transform: translateY(0) translateX(0) scale(1);
-      opacity: 1;
+  @keyframes glow {
+    0%, 100% {
+      text-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
     }
-    100% {
-      transform: translateY(-150px) translateX(var(--tx, 0)) scale(0);
-      opacity: 0;
+    50% {
+      text-shadow: 0 0 30px rgba(255, 107, 53, 0.9);
     }
   }
 
-  @keyframes fadeInScale {
-    0% {
-      opacity: 0;
-      transform: translate(-50%, -50%) scale(0.8);
-    }
-    100% {
-      opacity: 1;
-      transform: translate(-50%, -50%) scale(1);
-    }
-  }
-
-  .confetti {
+  .heart-float {
     position: fixed;
+    font-size: 28px;
+    font-weight: bold;
+    z-index: 9999;
     pointer-events: none;
-    animation: confetti-fall 2.5s ease-in forwards;
+    user-select: none;
+    animation: floatHearts 2s ease-out forwards, glow 0.8s ease-in-out infinite;
+    color: #FF6B35;
   }
 
-  .heart-animation {
-    animation: heartPulse 0.6s ease-in-out;
+  .heart-float-delay-1 {
+    animation-delay: 0ms, 0ms;
+  }
+
+  .heart-float-delay-2 {
+    animation-delay: 100ms, 100ms;
+  }
+
+  .heart-float-delay-3 {
+    animation-delay: 200ms, 200ms;
   }
 `
 
-// BREAKPOINTS
-export const BREAKPOINTS = {
-  mobile: '480px',
-  tablet: '768px',
-  desktop: '1024px',
-}
-
-// SPACING
-export const SPACING = {
-  xs: '4px',
-  sm: '8px',
-  md: '12px',
-  lg: '16px',
-  xl: '24px',
-  xxl: '32px',
-}
-
-// BORDER RADIUS
-export const RADIUS = {
-  sm: '4px',
-  md: '6px',
-  lg: '8px',
-  xl: '12px',
-}
-
-// SHADOWS
-export const SHADOWS = {
-  sm: '0 2px 4px rgba(0, 0, 0, 0.1)',
-  md: '0 2px 8px rgba(0, 0, 0, 0.04)',
-  lg: '0 10px 40px rgba(255, 107, 53, 0.4)',
-}
-
-// MESSAGES
-export const MESSAGES = {
-  login_intro: 'Quoi faire maintenant? Des idées fraîches, postées en direct',
-  offers_instruction: 'Demande le code à ton commerçant, pour profiter de l\'offre!',
-  offers_countdown: 'Valable jusqu\'à 20h30 aujourd\'hui',
-  offers_validation: 'Tu as gagné 25 points!',
-  no_results: 'Aucun établissement ne correspond à ta recherche',
+export const STYLES = {
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100vh',
+    backgroundColor: COLORS.background,
+    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+  },
+  header: {
+    backgroundColor: COLORS.primary,
+    color: 'white',
+    padding: '16px 20px',
+    fontSize: '20px',
+    fontWeight: 'bold',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+  },
+  filterBar: {
+    display: 'flex',
+    gap: '8px',
+    padding: '12px 16px',
+    backgroundColor: COLORS.lightBg,
+    overflowX: 'auto',
+    borderBottom: `1px solid ${COLORS.border}`,
+    scrollBehavior: 'smooth',
+  },
+  filterButton: {
+    padding: '8px 16px',
+    backgroundColor: 'white',
+    border: `2px solid ${COLORS.border}`,
+    borderRadius: '20px',
+    cursor: 'pointer',
+    whiteSpace: 'nowrap',
+    fontSize: '14px',
+    transition: 'all 0.3s ease',
+    flexShrink: 0,
+  },
+  filterButtonActive: {
+    backgroundColor: COLORS.primary,
+    color: 'white',
+    borderColor: COLORS.primary,
+  },
+  content: {
+    flex: 1,
+    overflowY: 'auto',
+    padding: '12px 16px',
+  },
+  card: {
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    marginBottom: '12px',
+    padding: '12px',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+    border: `1px solid ${COLORS.border}`,
+    transition: 'all 0.2s ease',
+    cursor: 'pointer',
+  },
+  cardHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: '8px',
+  },
+  cardTitle: {
+    fontSize: '16px',
+    fontWeight: '600',
+    color: COLORS.text,
+  },
+  likeButton: {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '24px',
+    padding: '4px 8px',
+    transition: 'transform 0.2s ease',
+  },
+  likeButtonLiked: {
+    transform: 'scale(1.2)',
+  },
+  cardMeta: {
+    display: 'flex',
+    gap: '12px',
+    fontSize: '13px',
+    color: '#666',
+    marginBottom: '8px',
+    flexWrap: 'wrap',
+  },
+  cardDescription: {
+    fontSize: '14px',
+    color: '#555',
+    marginBottom: '8px',
+    lineHeight: '1.4',
+  },
+  badge: {
+    display: 'inline-block',
+    padding: '4px 8px',
+    backgroundColor: COLORS.accent,
+    color: COLORS.text,
+    borderRadius: '4px',
+    fontSize: '12px',
+    fontWeight: '600',
+  },
+  emptyState: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '40px 20px',
+    color: '#999',
+  },
 }
