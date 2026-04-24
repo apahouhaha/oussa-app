@@ -1,197 +1,154 @@
 import { useState, useRef, useEffect } from 'react'
 
+// Style global pour l'animation du coeur
+const heartAnimationStyle = `
+  @keyframes heartPulse {
+    0% {
+      transform: scale(1);
+    }
+    25% {
+      transform: scale(1.3);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  
+  .heart-animation {
+    animation: heartPulse 0.6s ease-in-out;
+  }
+`
+
+// Injecter les styles
+if (typeof document !== 'undefined') {
+  const style = document.createElement('style')
+  style.textContent = heartAnimationStyle
+  document.head.appendChild(style)
+}
+
+const CATEGORIES = [
+  { id: 'bars', emoji: '🍻', label: 'Bars' },
+  { id: 'restos', emoji: '🍽️', label: 'Restos' },
+  { id: 'clubs', emoji: '🎵', label: 'Clubs' },
+  { id: 'events', emoji: '🎪', label: 'Événementiel' },
+  { id: 'other', emoji: '🌍', label: 'Autres' },
+]
+
+const FILTER_OPTIONS = [
+  { id: 'open', emoji: '⏰', label: 'Ouvert' },
+  { id: 'nearby', emoji: '📍', label: '< 500m' },
+  { id: 'terrasse', emoji: '☀️', label: 'Terrasse' },
+  { id: 'wifi', emoji: '📶', label: 'WiFi' },
+  { id: 'parking', emoji: '🅿️', label: 'Parking' },
+  { id: 'metro', emoji: '🚇', label: 'Métro-Tram' },
+  { id: 'takeaway', emoji: '🚚', label: 'À emporter' },
+  { id: 'offers', emoji: '🎁', label: 'Offres' },
+  { id: 'happyhour', emoji: '🍹', label: 'Happy Hour' },
+  { id: 'pets', emoji: '🐕', label: 'Pet friendly' },
+  { id: 'games', emoji: '🎲', label: 'Jeux' },
+  { id: 'concerts', emoji: '🎵', label: 'Concerts' },
+]
+
 const BARS = [
-  {
-    id: 1,
-    name: 'La Dame Jeanne',
-    type: ['Cave à bières', 'Bar'],
-    location: 'Mouvaux',
-    rating: null,
-    distance: 0.5,
-    emoji: '🍻',
-    tags: ['Terrasse', 'Parking'],
-    profilePhoto: 'https://raw.githubusercontent.com/apahouhaha/oussa-app/main/photo_ladamejeanne_profil.jpg',
-    postPhoto: 'https://raw.githubusercontent.com/apahouhaha/oussa-app/main/photo_ladamejeanne_post.jpg',
-    title: 'Ta bière 33cl au prix de la 25cl!',
-    description: 'Valable sur nos becs 1 à 5, sur présentation de l\'appli',
-    phone: '+33 3 20 55 XX XX',
-    email: 'contact@ladamejeanne.fr',
-    googleMapsUrl: 'https://maps.google.com/?q=La+Dame+Jeanne+Mouvaux',
-    googleReviewsUrl: 'https://g.page/ladamejeanne',
-    instagram: 'https://instagram.com/ladamejeanne',
-    website: 'https://ladamejeanne.fr',
-  },
-  {
-    id: 2,
-    name: 'Le Rallye',
-    type: ['Bar traditionnel'],
-    location: 'Croix',
-    rating: null,
-    distance: 1.2,
-    emoji: '🎲',
-    tags: ['Métro', 'Happy Hour'],
-    profilePhoto: 'https://raw.githubusercontent.com/apahouhaha/oussa-app/main/photo_lerallye_profil.jpg',
-    postPhoto: 'https://raw.githubusercontent.com/apahouhaha/oussa-app/main/photo_lerallye_post.jpg',
-    phone: '+33 3 XX XX XX XX',
-    email: 'contact@lerallye.fr',
-    googleMapsUrl: 'https://maps.google.com/?q=Le+Rallye+Croix',
-    googleReviewsUrl: 'https://g.page/lerallye',
-    instagram: 'https://instagram.com/lerallye',
-    website: 'https://lerallye.fr',
-  },
-  {
-    id: 3,
-    name: 'Thida Angkor Bar',
-    type: ['Bar exotique'],
-    location: 'Roubaix',
-    rating: null,
-    distance: 2.1,
-    emoji: '🌏',
-    tags: ['Terrasse', 'Métro'],
-    profilePhoto: 'https://raw.githubusercontent.com/apahouhaha/oussa-app/main/photo_thida_profil.jpg',
-    postPhoto: 'https://raw.githubusercontent.com/apahouhaha/oussa-app/main/photo_thida_post.jpg',
-    phone: '+33 3 XX XX XX XX',
-    email: 'contact@thida.fr',
-    googleMapsUrl: 'https://maps.google.com/?q=Thida+Angkor+Bar+Roubaix',
-    googleReviewsUrl: 'https://g.page/thida',
-    instagram: 'https://instagram.com/thida',
-    website: 'https://thida.fr',
-  },
-  {
-    id: 4,
-    name: 'Drops',
-    type: ['Cocktail bar'],
-    location: 'Lys-lez-Lannoy',
-    rating: null,
-    distance: 1.8,
-    emoji: '💧',
-    tags: ['Happy Hour', 'Parking'],
-    profilePhoto: 'https://raw.githubusercontent.com/apahouhaha/oussa-app/main/photo_drops_profil.jpg',
-    postPhoto: 'https://raw.githubusercontent.com/apahouhaha/oussa-app/main/photo_drops_post.jpg',
-    phone: '+33 3 XX XX XX XX',
-    email: 'contact@drops.fr',
-    googleMapsUrl: 'https://maps.google.com/?q=Drops+Lys-lez-Lannoy',
-    googleReviewsUrl: 'https://g.page/drops',
-    instagram: 'https://instagram.com/drops',
-    website: 'https://drops.fr',
-  },
-  {
-    id: 5,
-    name: 'Le Comptoir',
-    type: ['Bar chic'],
-    location: 'Mouvaux',
-    rating: null,
-    distance: 0.8,
-    emoji: '🍷',
-    tags: ['Terrasse'],
-    profilePhoto: null,
-    postPhoto: 'https://raw.githubusercontent.com/apahouhaha/oussa-app/main/photo_lecomptoir_post.jpg',
-    phone: '+33 3 XX XX XX XX',
-    email: 'contact@comptoir.fr',
-    googleMapsUrl: 'https://maps.google.com/?q=Le+Comptoir+Mouvaux',
-    googleReviewsUrl: 'https://g.page/comptoir',
-    instagram: 'https://instagram.com/comptoir',
-    website: 'https://comptoir.fr',
-  },
-  {
-    id: 6,
-    name: 'La Brasserie',
-    type: ['Brasserie'],
-    location: 'Croix',
-    rating: null,
-    distance: 1.5,
-    emoji: '🍺',
-    tags: ['Terrasse', 'Happy Hour'],
-    profilePhoto: null,
-    postPhoto: 'https://raw.githubusercontent.com/apahouhaha/oussa-app/main/photo_labrasserie_post.jpg',
-    phone: '+33 3 XX XX XX XX',
-    email: 'contact@brasserie.fr',
-    googleMapsUrl: 'https://maps.google.com/?q=La+Brasserie+Croix',
-    googleReviewsUrl: 'https://g.page/brasserie',
-    instagram: 'https://instagram.com/brasserie',
-    website: 'https://brasserie.fr',
-  },
-  {
-    id: 7,
-    name: 'Café Moderne',
-    type: ['Café bar'],
-    location: 'Roubaix',
-    rating: null,
-    distance: 2.3,
-    emoji: '☕',
-    tags: ['Métro', 'Parking'],
-    profilePhoto: null,
-    postPhoto: 'https://raw.githubusercontent.com/apahouhaha/oussa-app/main/photo_cafemoderne_post.jpg',
-    phone: '+33 3 XX XX XX XX',
-    email: 'contact@cafemodern.fr',
-    googleMapsUrl: 'https://maps.google.com/?q=Cafe+Moderne+Roubaix',
-    googleReviewsUrl: 'https://g.page/cafemodern',
-    instagram: 'https://instagram.com/cafemodern',
-    website: 'https://cafemodern.fr',
-  },
-  {
-    id: 8,
-    name: 'Le Brassin',
-    type: ['Micro-brasserie'],
-    location: 'Mouvaux',
-    rating: null,
-    distance: 0.3,
-    emoji: '🏭',
-    tags: ['Terrasse'],
-    profilePhoto: null,
-    postPhoto: 'https://raw.githubusercontent.com/apahouhaha/oussa-app/main/photo_lebrassin_post.jpg',
-    phone: '+33 3 XX XX XX XX',
-    email: 'contact@brassin.fr',
-    googleMapsUrl: 'https://maps.google.com/?q=Le+Brassin+Mouvaux',
-    googleReviewsUrl: 'https://g.page/brassin',
-    instagram: 'https://instagram.com/brassin',
-    website: 'https://brassin.fr',
-  },
-  {
-    id: 9,
-    name: 'Bistro du Coin',
-    type: ['Bistrot'],
-    location: 'Tourcoing',
-    rating: null,
-    distance: 1.9,
-    emoji: '🍽️',
-    tags: ['Happy Hour', 'Métro'],
-    profilePhoto: null,
-    postPhoto: 'https://raw.githubusercontent.com/apahouhaha/oussa-app/main/photo_bistrotducoin_post.jpg',
-    phone: '+33 3 XX XX XX XX',
-    email: 'contact@bistro.fr',
-    googleMapsUrl: 'https://maps.google.com/?q=Bistro+du+Coin+Tourcoing',
-    googleReviewsUrl: 'https://g.page/bistro',
-    instagram: 'https://instagram.com/bistro',
-    website: 'https://bistro.fr',
-  },
+  // BARS - 10 établissements
+  { id: 1, name: 'La Dame Jeanne', category: 'bars', location: 'Mouvaux', distance: 0.5, emoji: '🍻', filters: ['terrasse', 'parking', 'offers', 'happyhour'], profilePhoto: 'https://raw.githubusercontent.com/apahouhaha/oussa-app/main/photo_ladamejeanne_profil.jpg', postPhoto: 'https://raw.githubusercontent.com/apahouhaha/oussa-app/main/photo_ladamejeanne_post.jpg', phone: '+33 3 20 55 01 01', email: 'contact@ladamejeanne.fr', googleMapsUrl: 'https://maps.google.com/?q=La+Dame+Jeanne+Mouvaux', googleReviewsUrl: 'https://g.page/ladamejeanne', instagram: 'https://instagram.com/ladamejeanne', website: 'https://ladamejeanne.fr' },
+  { id: 2, name: 'Le Rallye', category: 'bars', location: 'Croix', distance: 1.2, emoji: '🎲', filters: ['metro', 'happyhour', 'games', 'wifi'], profilePhoto: 'https://raw.githubusercontent.com/apahouhaha/oussa-app/main/photo_lerallye_profil.jpg', postPhoto: 'https://raw.githubusercontent.com/apahouhaha/oussa-app/main/photo_lerallye_post.jpg', phone: '+33 3 20 55 02 02', email: 'contact@lerallye.fr', googleMapsUrl: 'https://maps.google.com/?q=Le+Rallye+Croix', googleReviewsUrl: 'https://g.page/lerallye', instagram: 'https://instagram.com/lerallye', website: 'https://lerallye.fr' },
+  { id: 3, name: 'Thida Angkor Bar', category: 'bars', location: 'Roubaix', distance: 2.1, emoji: '🌏', filters: ['terrasse', 'metro', 'pets', 'offers'], profilePhoto: 'https://raw.githubusercontent.com/apahouhaha/oussa-app/main/photo_thida_profil.jpg', postPhoto: 'https://raw.githubusercontent.com/apahouhaha/oussa-app/main/photo_thida_post.jpg', phone: '+33 3 20 55 03 03', email: 'contact@thida.fr', googleMapsUrl: 'https://maps.google.com/?q=Thida+Bar', googleReviewsUrl: 'https://g.page/thida', instagram: 'https://instagram.com/thida', website: 'https://thida.fr' },
+  { id: 4, name: 'The Irish Pub', category: 'bars', location: 'Mouvaux', distance: 0.8, emoji: '☘️', filters: ['terrasse', 'wifi', 'pets'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 04 04', email: 'contact@irishpub.fr', googleMapsUrl: 'https://maps.google.com/?q=Irish+Pub+Mouvaux', googleReviewsUrl: 'https://g.page/irishpub', instagram: 'https://instagram.com/irishpub', website: 'https://irishpub.fr' },
+  { id: 5, name: 'Bar du Vieux Port', category: 'bars', location: 'Tourcoing', distance: 2.5, emoji: '⚓', filters: ['metro', 'parking', 'happyhour', 'offers'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 05 05', email: 'contact@vieuxport.fr', googleMapsUrl: 'https://maps.google.com/?q=Bar+Vieux+Port', googleReviewsUrl: 'https://g.page/vieuxport', instagram: 'https://instagram.com/vieuxport', website: 'https://vieuxport.fr' },
+  { id: 6, name: 'Cocktail Corner', category: 'bars', location: 'Croix', distance: 1.5, emoji: '🍸', filters: ['wifi', 'offers', 'parking'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 06 06', email: 'contact@cocktailcorner.fr', googleMapsUrl: 'https://maps.google.com/?q=Cocktail+Corner', googleReviewsUrl: 'https://g.page/cocktailcorner', instagram: 'https://instagram.com/cocktailcorner', website: 'https://cocktailcorner.fr' },
+  { id: 7, name: 'Café du Coin', category: 'bars', location: 'Mouvaux', distance: 0.3, emoji: '☕', filters: ['terrasse', 'wifi', 'takeaway', 'pets'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 07 07', email: 'contact@cafducoin.fr', googleMapsUrl: 'https://maps.google.com/?q=Cafe+du+Coin', googleReviewsUrl: 'https://g.page/cafducoin', instagram: 'https://instagram.com/cafducoin', website: 'https://cafducoin.fr' },
+  { id: 8, name: 'Le Cabaret', category: 'bars', location: 'Roubaix', distance: 2.3, emoji: '🎭', filters: ['concerts', 'parking', 'metro'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 08 08', email: 'contact@lecabaret.fr', googleMapsUrl: 'https://maps.google.com/?q=Le+Cabaret', googleReviewsUrl: 'https://g.page/lecabaret', instagram: 'https://instagram.com/lecabaret', website: 'https://lecabaret.fr' },
+  { id: 9, name: 'Tapas Bar', category: 'bars', location: 'Croix', distance: 1.1, emoji: '🥘', filters: ['terrasse', 'happyhour', 'offers', 'wifi'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 09 09', email: 'contact@tapasbar.fr', googleMapsUrl: 'https://maps.google.com/?q=Tapas+Bar', googleReviewsUrl: 'https://g.page/tapasbar', instagram: 'https://instagram.com/tapasbar', website: 'https://tapasbar.fr' },
+  { id: 10, name: 'Brasserie Moderne', category: 'bars', location: 'Mouvaux', distance: 1.0, emoji: '🍺', filters: ['terrasse', 'parking', 'pets', 'happyhour'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 10 10', email: 'contact@brasseriemoderne.fr', googleMapsUrl: 'https://maps.google.com/?q=Brasserie+Moderne', googleReviewsUrl: 'https://g.page/brasseriemoderne', instagram: 'https://instagram.com/brasseriemoderne', website: 'https://brasseriemoderne.fr' },
+
+  // RESTOS - 10 établissements
+  { id: 11, name: 'Le Comptoir', category: 'restos', location: 'Mouvaux', distance: 0.8, emoji: '🍷', filters: ['terrasse', 'wifi', 'takeaway', 'pets'], profilePhoto: null, postPhoto: 'https://raw.githubusercontent.com/apahouhaha/oussa-app/main/photo_lecomptoir_post.jpg', phone: '+33 3 20 55 11 11', email: 'contact@comptoir.fr', googleMapsUrl: 'https://maps.google.com/?q=Le+Comptoir', googleReviewsUrl: 'https://g.page/comptoir', instagram: 'https://instagram.com/comptoir', website: 'https://comptoir.fr' },
+  { id: 12, name: 'La Brasserie', category: 'restos', location: 'Croix', distance: 1.5, emoji: '🍺', filters: ['terrasse', 'happyhour', 'parking', 'offers'], profilePhoto: null, postPhoto: 'https://raw.githubusercontent.com/apahouhaha/oussa-app/main/photo_labrasserie_post.jpg', phone: '+33 3 20 55 12 12', email: 'contact@brasserie.fr', googleMapsUrl: 'https://maps.google.com/?q=La+Brasserie', googleReviewsUrl: 'https://g.page/brasserie', instagram: 'https://instagram.com/brasserie', website: 'https://brasserie.fr' },
+  { id: 13, name: 'Le Gourmet', category: 'restos', location: 'Tourcoing', distance: 2.0, emoji: '🍽️', filters: ['wifi', 'parking', 'takeaway', 'offers'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 13 13', email: 'contact@legourmet.fr', googleMapsUrl: 'https://maps.google.com/?q=Le+Gourmet', googleReviewsUrl: 'https://g.page/legourmet', instagram: 'https://instagram.com/legourmet', website: 'https://legourmet.fr' },
+  { id: 14, name: 'Pizzeria Roma', category: 'restos', location: 'Mouvaux', distance: 1.2, emoji: '🍕', filters: ['takeaway', 'wifi', 'parking'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 14 14', email: 'contact@pizzeriaroma.fr', googleMapsUrl: 'https://maps.google.com/?q=Pizzeria+Roma', googleReviewsUrl: 'https://g.page/pizzeriaroma', instagram: 'https://instagram.com/pizzeriaroma', website: 'https://pizzeriaroma.fr' },
+  { id: 15, name: 'Sushi Zen', category: 'restos', location: 'Croix', distance: 1.8, emoji: '🍣', filters: ['takeaway', 'wifi', 'offers', 'metro'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 15 15', email: 'contact@sushizen.fr', googleMapsUrl: 'https://maps.google.com/?q=Sushi+Zen', googleReviewsUrl: 'https://g.page/sushizen', instagram: 'https://instagram.com/sushizen', website: 'https://sushizen.fr' },
+  { id: 16, name: 'Burger House', category: 'restos', location: 'Roubaix', distance: 2.2, emoji: '🍔', filters: ['takeaway', 'parking', 'happyhour'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 16 16', email: 'contact@burgerhouse.fr', googleMapsUrl: 'https://maps.google.com/?q=Burger+House', googleReviewsUrl: 'https://g.page/burgerhouse', instagram: 'https://instagram.com/burgerhouse', website: 'https://burgerhouse.fr' },
+  { id: 17, name: 'Bistro Parisien', category: 'restos', location: 'Mouvaux', distance: 0.6, emoji: '🥖', filters: ['terrasse', 'wifi', 'parking', 'offers'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 17 17', email: 'contact@bistroparisien.fr', googleMapsUrl: 'https://maps.google.com/?q=Bistro+Parisien', googleReviewsUrl: 'https://g.page/bistroparisien', instagram: 'https://instagram.com/bistroparisien', website: 'https://bistroparisien.fr' },
+  { id: 18, name: 'Thai Palace', category: 'restos', location: 'Croix', distance: 1.4, emoji: '🍜', filters: ['takeaway', 'wifi', 'metro', 'pets'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 18 18', email: 'contact@thaipalace.fr', googleMapsUrl: 'https://maps.google.com/?q=Thai+Palace', googleReviewsUrl: 'https://g.page/thaipalace', instagram: 'https://instagram.com/thaipalace', website: 'https://thaipalace.fr' },
+  { id: 19, name: 'Steakhouse Prime', category: 'restos', location: 'Tourcoing', distance: 2.4, emoji: '🥩', filters: ['parking', 'wifi', 'offers'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 19 19', email: 'contact@steakhouseprime.fr', googleMapsUrl: 'https://maps.google.com/?q=Steakhouse+Prime', googleReviewsUrl: 'https://g.page/steakhouseprime', instagram: 'https://instagram.com/steakhouseprime', website: 'https://steakhouseprime.fr' },
+  { id: 20, name: 'Vegan House', category: 'restos', location: 'Mouvaux', distance: 1.3, emoji: '🥗', filters: ['takeaway', 'wifi', 'terrasse', 'pets'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 20 20', email: 'contact@veganhouse.fr', googleMapsUrl: 'https://maps.google.com/?q=Vegan+House', googleReviewsUrl: 'https://g.page/veganhouse', instagram: 'https://instagram.com/veganhouse', website: 'https://veganhouse.fr' },
+
+  // CLUBS - 10 établissements
+  { id: 21, name: 'Drops Club', category: 'clubs', location: 'Lys-lez-Lannoy', distance: 1.8, emoji: '💧', filters: ['happyhour', 'parking', 'concerts'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 21 21', email: 'contact@drops.fr', googleMapsUrl: 'https://maps.google.com/?q=Drops+Club', googleReviewsUrl: 'https://g.page/drops', instagram: 'https://instagram.com/drops', website: 'https://drops.fr' },
+  { id: 22, name: 'La Nuit Club', category: 'clubs', location: 'Roubaix', distance: 2.3, emoji: '🌙', filters: ['concerts', 'happyhour', 'metro', 'parking'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 22 22', email: 'contact@lanuitclub.fr', googleMapsUrl: 'https://maps.google.com/?q=La+Nuit+Club', googleReviewsUrl: 'https://g.page/lanuitclub', instagram: 'https://instagram.com/lanuitclub', website: 'https://lanuitclub.fr' },
+  { id: 23, name: 'Electric Pulse', category: 'clubs', location: 'Croix', distance: 1.6, emoji: '⚡', filters: ['concerts', 'wifi', 'parking', 'offers'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 23 23', email: 'contact@electricpulse.fr', googleMapsUrl: 'https://maps.google.com/?q=Electric+Pulse', googleReviewsUrl: 'https://g.page/electricpulse', instagram: 'https://instagram.com/electricpulse', website: 'https://electricpulse.fr' },
+  { id: 24, name: 'Disco Fever', category: 'clubs', location: 'Mouvaux', distance: 0.9, emoji: '🕺', filters: ['concerts', 'parking', 'happyhour'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 24 24', email: 'contact@discofever.fr', googleMapsUrl: 'https://maps.google.com/?q=Disco+Fever', googleReviewsUrl: 'https://g.page/discofever', instagram: 'https://instagram.com/discofever', website: 'https://discofever.fr' },
+  { id: 25, name: 'Boom Lounge', category: 'clubs', location: 'Tourcoing', distance: 2.1, emoji: '🎧', filters: ['concerts', 'metro', 'wifi', 'offers'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 25 25', email: 'contact@boomlounge.fr', googleMapsUrl: 'https://maps.google.com/?q=Boom+Lounge', googleReviewsUrl: 'https://g.page/boomlounge', instagram: 'https://instagram.com/boomlounge', website: 'https://boomlounge.fr' },
+  { id: 26, name: 'The Mix', category: 'clubs', location: 'Roubaix', distance: 2.4, emoji: '🎵', filters: ['concerts', 'parking', 'wifi'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 26 26', email: 'contact@themix.fr', googleMapsUrl: 'https://maps.google.com/?q=The+Mix', googleReviewsUrl: 'https://g.page/themix', instagram: 'https://instagram.com/themix', website: 'https://themix.fr' },
+  { id: 27, name: 'Vinyl Underground', category: 'clubs', location: 'Croix', distance: 1.3, emoji: '🎚️', filters: ['concerts', 'metro', 'parking', 'offers'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 27 27', email: 'contact@vinylunderground.fr', googleMapsUrl: 'https://maps.google.com/?q=Vinyl+Underground', googleReviewsUrl: 'https://g.page/vinylunderground', instagram: 'https://instagram.com/vinylunderground', website: 'https://vinylunderground.fr' },
+  { id: 28, name: 'Club Essence', category: 'clubs', location: 'Mouvaux', distance: 1.1, emoji: '✨', filters: ['concerts', 'happyhour', 'wifi'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 28 28', email: 'contact@clubessence.fr', googleMapsUrl: 'https://maps.google.com/?q=Club+Essence', googleReviewsUrl: 'https://g.page/clubessence', instagram: 'https://instagram.com/clubessence', website: 'https://clubessence.fr' },
+  { id: 29, name: 'Deep House', category: 'clubs', location: 'Tourcoing', distance: 2.0, emoji: '🏠', filters: ['concerts', 'parking', 'metro'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 29 29', email: 'contact@deephouse.fr', googleMapsUrl: 'https://maps.google.com/?q=Deep+House', googleReviewsUrl: 'https://g.page/deephouse', instagram: 'https://instagram.com/deephouse', website: 'https://deephouse.fr' },
+  { id: 30, name: 'Techno Vibes', category: 'clubs', location: 'Roubaix', distance: 2.2, emoji: '🤖', filters: ['concerts', 'wifi', 'parking', 'offers'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 30 30', email: 'contact@technovibes.fr', googleMapsUrl: 'https://maps.google.com/?q=Techno+Vibes', googleReviewsUrl: 'https://g.page/technovibes', instagram: 'https://instagram.com/technovibes', website: 'https://technovibes.fr' },
+
+  // AUTRES - 10 établissements
+  { id: 31, name: 'Café Moderne', category: 'other', location: 'Roubaix', distance: 2.3, emoji: '☕', filters: ['metro', 'parking', 'wifi', 'takeaway'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 31 31', email: 'contact@cafemodern.fr', googleMapsUrl: 'https://maps.google.com/?q=Cafe+Moderne', googleReviewsUrl: 'https://g.page/cafemodern', instagram: 'https://instagram.com/cafemodern', website: 'https://cafemodern.fr' },
+  { id: 32, name: 'Le Brassin', category: 'other', location: 'Mouvaux', distance: 0.3, emoji: '🏭', filters: ['terrasse', 'games', 'concerts', 'offers'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 32 32', email: 'contact@brassin.fr', googleMapsUrl: 'https://maps.google.com/?q=Le+Brassin', googleReviewsUrl: 'https://g.page/brassin', instagram: 'https://instagram.com/brassin', website: 'https://brassin.fr' },
+  { id: 33, name: 'Bistro du Coin', category: 'other', location: 'Tourcoing', distance: 1.9, emoji: '🍷', filters: ['happyhour', 'metro', 'pets', 'wifi'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 33 33', email: 'contact@bistro.fr', googleMapsUrl: 'https://maps.google.com/?q=Bistro+du+Coin', googleReviewsUrl: 'https://g.page/bistro', instagram: 'https://instagram.com/bistro', website: 'https://bistro.fr' },
+  { id: 34, name: 'Salle de Jeux', category: 'other', location: 'Mouvaux', distance: 1.0, emoji: '🎪', filters: ['games', 'parking', 'offers', 'pets'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 34 34', email: 'contact@sallejeux.fr', googleMapsUrl: 'https://maps.google.com/?q=Salle+de+Jeux', googleReviewsUrl: 'https://g.page/sallejeux', instagram: 'https://instagram.com/sallejeux', website: 'https://sallejeux.fr' },
+  { id: 35, name: 'Billiard Club', category: 'other', location: 'Croix', distance: 1.4, emoji: '🎱', filters: ['games', 'wifi', 'parking', 'happyhour'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 35 35', email: 'contact@billardclub.fr', googleMapsUrl: 'https://maps.google.com/?q=Billiard+Club', googleReviewsUrl: 'https://g.page/billardclub', instagram: 'https://instagram.com/billardclub', website: 'https://billardclub.fr' },
+  { id: 36, name: 'Board Game Arena', category: 'other', location: 'Mouvaux', distance: 0.7, emoji: '🃏', filters: ['games', 'wifi', 'pets', 'offers'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 36 36', email: 'contact@boardgamearena.fr', googleMapsUrl: 'https://maps.google.com/?q=Board+Game+Arena', googleReviewsUrl: 'https://g.page/boardgamearena', instagram: 'https://instagram.com/boardgamearena', website: 'https://boardgamearena.fr' },
+  { id: 37, name: 'Outdoor Terrace', category: 'other', location: 'Tourcoing', distance: 2.1, emoji: '⛺', filters: ['terrasse', 'pets', 'parking', 'happyhour'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 37 37', email: 'contact@outdoorterrace.fr', googleMapsUrl: 'https://maps.google.com/?q=Outdoor+Terrace', googleReviewsUrl: 'https://g.page/outdoorterrace', instagram: 'https://instagram.com/outdoorterrace', website: 'https://outdoorterrace.fr' },
+  { id: 38, name: 'Comedy Club', category: 'other', location: 'Roubaix', distance: 2.2, emoji: '🎤', filters: ['concerts', 'parking', 'wifi', 'metro'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 38 38', email: 'contact@comedyclub.fr', googleMapsUrl: 'https://maps.google.com/?q=Comedy+Club', googleReviewsUrl: 'https://g.page/comedyclub', instagram: 'https://instagram.com/comedyclub', website: 'https://comedyclub.fr' },
+  { id: 39, name: 'Art Lounge', category: 'other', location: 'Croix', distance: 1.7, emoji: '🎨', filters: ['wifi', 'parking', 'pets', 'offers'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 39 39', email: 'contact@artlounge.fr', googleMapsUrl: 'https://maps.google.com/?q=Art+Lounge', googleReviewsUrl: 'https://g.page/artlounge', instagram: 'https://instagram.com/artlounge', website: 'https://artlounge.fr' },
+  { id: 40, name: 'Reading Room', category: 'other', location: 'Mouvaux', distance: 0.5, emoji: '📚', filters: ['wifi', 'terrasse', 'pets', 'takeaway'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 40 40', email: 'contact@readingroom.fr', googleMapsUrl: 'https://maps.google.com/?q=Reading+Room', googleReviewsUrl: 'https://g.page/readingroom', instagram: 'https://instagram.com/readingroom', website: 'https://readingroom.fr' },
+
+  // ÉVÉNEMENTIEL - 10 établissements
+  { id: 41, name: 'Salle Événement Premium', category: 'events', location: 'Mouvaux', distance: 1.2, emoji: '🎊', filters: ['parking', 'wifi', 'metro'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 41 41', email: 'contact@sallepremium.fr', googleMapsUrl: 'https://maps.google.com/?q=Salle+Premium', googleReviewsUrl: 'https://g.page/sallepremium', instagram: 'https://instagram.com/sallepremium', website: 'https://sallepremium.fr' },
+  { id: 42, name: 'Grand Hall', category: 'events', location: 'Croix', distance: 1.5, emoji: '🏛️', filters: ['parking', 'wifi', 'offers'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 42 42', email: 'contact@grandhall.fr', googleMapsUrl: 'https://maps.google.com/?q=Grand+Hall', googleReviewsUrl: 'https://g.page/grandhall', instagram: 'https://instagram.com/grandhall', website: 'https://grandhall.fr' },
+  { id: 43, name: 'Wedding Venue', category: 'events', location: 'Roubaix', distance: 2.0, emoji: '💒', filters: ['parking', 'pets', 'parking'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 43 43', email: 'contact@weddingvenue.fr', googleMapsUrl: 'https://maps.google.com/?q=Wedding+Venue', googleReviewsUrl: 'https://g.page/weddingvenue', instagram: 'https://instagram.com/weddingvenue', website: 'https://weddingvenue.fr' },
+  { id: 44, name: 'Corporate Space', category: 'events', location: 'Mouvaux', distance: 0.9, emoji: '🏢', filters: ['wifi', 'parking', 'metro'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 44 44', email: 'contact@corporatespace.fr', googleMapsUrl: 'https://maps.google.com/?q=Corporate+Space', googleReviewsUrl: 'https://g.page/corporatespace', instagram: 'https://instagram.com/corporatespace', website: 'https://corporatespace.fr' },
+  { id: 45, name: 'Exhibition Center', category: 'events', location: 'Tourcoing', distance: 2.2, emoji: '🖼️', filters: ['parking', 'wifi', 'offers'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 45 45', email: 'contact@exhibitioncenter.fr', googleMapsUrl: 'https://maps.google.com/?q=Exhibition+Center', googleReviewsUrl: 'https://g.page/exhibitioncenter', instagram: 'https://instagram.com/exhibitioncenter', website: 'https://exhibitioncenter.fr' },
+  { id: 46, name: 'Festival Grounds', category: 'events', location: 'Roubaix', distance: 2.3, emoji: '🎪', filters: ['parking', 'metro', 'concerts'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 46 46', email: 'contact@festivalgrounds.fr', googleMapsUrl: 'https://maps.google.com/?q=Festival+Grounds', googleReviewsUrl: 'https://g.page/festivalgrounds', instagram: 'https://instagram.com/festivalgrounds', website: 'https://festivalgrounds.fr' },
+  { id: 47, name: 'Party Palace', category: 'events', location: 'Croix', distance: 1.3, emoji: '🎉', filters: ['parking', 'wifi', 'offers'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 47 47', email: 'contact@partypalace.fr', googleMapsUrl: 'https://maps.google.com/?q=Party+Palace', googleReviewsUrl: 'https://g.page/partypalace', instagram: 'https://instagram.com/partypalace', website: 'https://partypalace.fr' },
+  { id: 48, name: 'Banquet Hall', category: 'events', location: 'Mouvaux', distance: 1.1, emoji: '🍽️', filters: ['parking', 'wifi', 'metro'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 48 48', email: 'contact@banquethall.fr', googleMapsUrl: 'https://maps.google.com/?q=Banquet+Hall', googleReviewsUrl: 'https://g.page/banquethall', instagram: 'https://instagram.com/banquethall', website: 'https://banquethall.fr' },
+  { id: 49, name: 'Conference Room Pro', category: 'events', location: 'Tourcoing', distance: 2.0, emoji: '📊', filters: ['wifi', 'parking', 'metro'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 49 49', email: 'contact@conferenceroom.fr', googleMapsUrl: 'https://maps.google.com/?q=Conference+Room', googleReviewsUrl: 'https://g.page/conferenceroom', instagram: 'https://instagram.com/conferenceroom', website: 'https://conferenceroom.fr' },
+  { id: 50, name: 'Show Theater', category: 'events', location: 'Roubaix', distance: 2.1, emoji: '🎬', filters: ['parking', 'metro', 'concerts'], profilePhoto: null, postPhoto: null, phone: '+33 3 20 55 50 50', email: 'contact@showtheater.fr', googleMapsUrl: 'https://maps.google.com/?q=Show+Theater', googleReviewsUrl: 'https://g.page/showtheater', instagram: 'https://instagram.com/showtheater', website: 'https://showtheater.fr' },
 ]
 
 const POSTS = [
-  { id: 1, barId: 1, description: 'Ta bière 33cl au prix de la 25cl!', isSpecialOffer: true, specialOfferCode: '1234' },
+  { id: 1, barId: 1, description: 'Ta bière 33cl au prix de la 25cl!', isSpecialOffer: true, specialOfferCode: '1234', offerTitle: 'Ta bière 33cl au prix de la 25cl!', offerSubDesc: 'Valable sur nos becs 1 à 5, sur présentation de l\'appli' },
   { id: 2, barId: 2, description: 'Happy hour 17h-19h: -30% sur les bières 🍻', isSpecialOffer: false },
-  { id: 3, barId: 3, description: 'Terrasse disponible maintenant! ☀️', isSpecialOffer: true, specialOfferCode: '1234' },
-  { id: 4, barId: 4, description: 'Cocktails signature à 8€ tout le mois 🍹', isSpecialOffer: false },
-  { id: 5, barId: 5, description: 'Apéritif dinatoire gratuit à partir de 20h ✨', isSpecialOffer: true, specialOfferCode: '1234' },
-  { id: 6, barId: 6, description: 'Bière artisanale à découvrir cette semaine 🏭', isSpecialOffer: false },
-  { id: 7, barId: 7, description: 'Café gourmand à moitié prix jusqu\'à 17h ☕', isSpecialOffer: false },
-  { id: 8, barId: 8, description: 'Nouvelle micro-brasserie à tester 🔥', isSpecialOffer: true, specialOfferCode: '1234' },
-  { id: 9, barId: 9, description: 'Réservations possibles pour 4+ personnes 📞', isSpecialOffer: false },
+  { id: 3, barId: 3, description: 'Terrasse disponible maintenant! ☀️', isSpecialOffer: true, specialOfferCode: '1234', offerTitle: 'Terrasse gratuite', offerSubDesc: 'Venez profiter de notre belle terrasse' },
+  { id: 4, barId: 4, description: 'Soirée chill ce soir 🎶', isSpecialOffer: false },
+  { id: 5, barId: 5, description: 'Apéritif dinatoire gratuit à partir de 20h ✨', isSpecialOffer: true, specialOfferCode: '1234', offerTitle: 'Apéritif gratuit', offerSubDesc: 'À partir de 20h tous les soirs' },
+  { id: 6, barId: 6, description: 'Nouveau cocktail spécial 🍹', isSpecialOffer: false },
+  { id: 7, barId: 7, description: 'Café et pâtisserie fraîche ☕', isSpecialOffer: false },
+  { id: 8, barId: 8, description: 'Concerts live ce weekend 🎤', isSpecialOffer: true, specialOfferCode: '1234', offerTitle: 'Entrée gratuite avant 21h', offerSubDesc: 'Sur présentation de ce code' },
+  { id: 9, barId: 9, description: 'Tapas à volonté 🥘', isSpecialOffer: false },
+  { id: 10, barId: 10, description: 'Happy hour chaque jour 17h-19h', isSpecialOffer: true, specialOfferCode: '1234', offerTitle: '-40% happy hour', offerSubDesc: 'De 17h à 19h tous les jours' },
+  { id: 11, barId: 11, description: 'Menu du jour: plat + verre de vin 12€ 🍷', isSpecialOffer: false },
+  { id: 12, barId: 12, description: 'Bière artisanale du mois 🏭', isSpecialOffer: true, specialOfferCode: '1234', offerTitle: 'Dégustation gratuite', offerSubDesc: 'Goûtez notre nouvelle bière' },
+  { id: 13, barId: 13, description: 'Cours de cuisine le weekend', isSpecialOffer: false },
+  { id: 14, barId: 14, description: 'Pizza taille XL à -25% 🍕', isSpecialOffer: true, specialOfferCode: '1234', offerTitle: 'Pizza XL -25%', offerSubDesc: 'À emporter ou sur place' },
+  { id: 15, barId: 15, description: 'Menu express 15min 🍣', isSpecialOffer: false },
+  { id: 16, barId: 16, description: 'Menu burger + frites + boisson', isSpecialOffer: true, specialOfferCode: '1234', offerTitle: 'Menu complet 9.99€', offerSubDesc: 'Valable à emporter seulement' },
+  { id: 17, barId: 17, description: 'Soirée France le jeudi', isSpecialOffer: false },
+  { id: 18, barId: 18, description: 'Pad Thaï spécial -30% 🍜', isSpecialOffer: true, specialOfferCode: '1234', offerTitle: 'Pad Thaï -30%', offerSubDesc: 'Tous les jours jusqu\'à 19h' },
+  { id: 19, barId: 19, description: 'Côte de boeuf grillée', isSpecialOffer: false },
+  { id: 20, barId: 20, description: 'Menu vegan 100% bio 🥗', isSpecialOffer: true, specialOfferCode: '1234', offerTitle: 'Menu vegan -20%', offerSubDesc: 'Tous les produits frais du jour' },
 ]
 
 export default function App() {
   const [user, setUser] = useState<any>(null)
   const [email, setEmail] = useState('test@example.com')
   const [activeTab, setActiveTab] = useState('home')
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([])
   const [likes, setLikes] = useState<{ [key: number]: boolean }>({})
   const [likeCount, setLikeCount] = useState<{ [key: number]: number }>({})
   const [selectedBar, setSelectedBar] = useState<any>(null)
   const [selectedPost, setSelectedPost] = useState<any>(null)
-  const [imageLoading, setImageLoading] = useState<{ [key: string]: boolean }>({})
   const [codeInput, setCodeInput] = useState('')
   const [codeVerified, setCodeVerified] = useState(false)
-  const [codeError, setCodeError] = useState(false)
-  const [sliderValue, setSliderValue] = useState(0)
   const [barLikes, setBarLikes] = useState<{ [key: number]: boolean }>({})
   const [barLikeCount, setBarLikeCount] = useState<{ [key: number]: number }>({})
 
@@ -239,10 +196,27 @@ export default function App() {
     })
   }
 
-  const formatTime = () => {
-    const now = new Date()
-    return now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+  const toggleFilter = (filterId: string) => {
+    setSelectedFilters((prev) =>
+      prev.includes(filterId) ? prev.filter((f) => f !== filterId) : [...prev, filterId]
+    )
   }
+
+  const filteredBars = BARS.filter((bar) => {
+    if (selectedCategory && bar.category !== selectedCategory) return false
+    
+    // Vérifier les filtres "normaux"
+    const normalFilters = selectedFilters.filter(f => f !== 'offers')
+    if (normalFilters.length > 0 && !normalFilters.every((f) => bar.filters.includes(f))) return false
+    
+    // Vérifier le filtre "Offres spéciales" dans POSTS
+    if (selectedFilters.includes('offers')) {
+      const hasOffer = POSTS.some(post => post.barId === bar.id && post.isSpecialOffer)
+      if (!hasOffer) return false
+    }
+    
+    return true
+  }).sort((a, b) => a.distance - b.distance)
 
   const openBarProfile = (bar: any) => {
     setSelectedBar(bar)
@@ -255,27 +229,12 @@ export default function App() {
       setSelectedPost({ ...post, bar })
       setCodeInput('')
       setCodeVerified(false)
-      setCodeError(false)
-      setSliderValue(0)
-    }
-  }
-
-  const verifyCode = () => {
-    if (!selectedPost) return
-    if (codeInput === selectedPost.specialOfferCode) {
-      setCodeVerified(true)
-      setCodeError(false)
-    } else {
-      setCodeError(true)
-      setCodeInput('')
     }
   }
 
   const completeOffer = () => {
-    if (codeVerified && sliderValue === 100) {
-      alert('✅ Offre validée! Vous avez gagné 25 points!')
-      closeModal()
-    }
+    alert('✅ Tu as gagné 25 points!')
+    closeModal()
   }
 
   const closeModal = () => {
@@ -283,272 +242,372 @@ export default function App() {
     setSelectedPost(null)
   }
 
+  const isCodeCorrect = codeInput.length === 4 && codeInput === selectedPost?.specialOfferCode
+
   if (!user) {
     return (
-      <div style={{ minHeight: '100vh', backgroundColor: '#0d1117', color: '#e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100vh', backgroundColor: '#ffffff', color: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ width: '100%', maxWidth: '400px', padding: '48px 24px', textAlign: 'center' }}>
-          <div style={{ fontSize: '48px', marginBottom: '24px' }}>🍻</div>
-          <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#FF6B35', marginBottom: '32px' }}>OUSSA</h1>
-          <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: '100%', padding: '12px 16px', marginBottom: '16px', backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '8px', color: '#e0e0e0', fontSize: '14px', boxSizing: 'border-box' }} />
-          <button onClick={handleLogin} style={{ width: '100%', padding: '12px', marginBottom: '12px', backgroundColor: '#FF6B35', color: 'white', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}>👤 Utilisateur</button>
-          <button onClick={handleLogin} style={{ width: '100%', padding: '12px', backgroundColor: '#FF6B35', color: 'white', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}>🏪 Commerçant</button>
+          <div style={{ fontSize: '64px', marginBottom: '24px' }}>🍻</div>
+          <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#FF6B35', marginBottom: '8px' }}>OUSSA</h1>
+          <p style={{ fontSize: '14px', color: '#666', marginBottom: '32px' }}>Quoi faire maintenant? Des idées fraîches, postées en direct</p>
+          <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: '100%', padding: '12px 16px', marginBottom: '16px', backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', borderRadius: '8px', color: '#1a1a1a', fontSize: '14px', boxSizing: 'border-box' }} />
+          <button onClick={handleLogin} style={{ width: '100%', padding: '12px', marginBottom: '12px', backgroundColor: '#FF6B35', color: 'white', fontWeight: '600', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}>Te connecter</button>
         </div>
       </div>
     )
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0d1117', color: '#e0e0e0' }}>
-      <div style={{ background: 'linear-gradient(135deg, #FF6B35, #FF8C5A)', color: 'white', padding: '24px', textAlign: 'center' }}>
-        <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px' }}>OUSSA</div>
-        <div style={{ fontSize: '14px', opacity: 0.9 }}>Buvez, mangez, festoyez!</div>
+    <div style={{ minHeight: '100vh', backgroundColor: '#ffffff', color: '#1a1a1a' }}>
+      {/* HEADER MINIMALISTE */}
+      <div style={{ padding: '16px 24px', borderBottom: '1px solid #e0e0e0' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <div style={{ fontSize: '12px', color: '#666' }}>📍 Mouvaux</div>
+          <div style={{ fontSize: '12px', color: '#666' }}>9:41</div>
+        </div>
+        <input type="text" placeholder="Rechercher bars, cafés..." style={{ width: '100%', padding: '12px 16px', backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', borderRadius: '8px', color: '#1a1a1a', fontSize: '14px', boxSizing: 'border-box' }} />
       </div>
 
+      {/* CATEGORIES SCROLL HORIZONTAL */}
+      <div style={{ borderBottom: '1px solid #e0e0e0', overflowX: 'auto', padding: '12px 0', paddingLeft: '24px' }}>
+        <div style={{ display: 'flex', gap: '12px', minWidth: 'min-content' }}>
+          {CATEGORIES.map((cat) => (
+            <button key={cat.id} onClick={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', padding: '12px 16px', backgroundColor: selectedCategory === cat.id ? '#FF6B35' : '#f5f5f5', color: selectedCategory === cat.id ? 'white' : '#1a1a1a', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: '500', whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
+              <span style={{ fontSize: '20px' }}>{cat.emoji}</span>
+              {cat.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* FILTRES SCROLL HORIZONTAL */}
+      <div style={{ borderBottom: '1px solid #e0e0e0', overflowX: 'auto', padding: '12px 0', paddingLeft: '24px' }}>
+        <div style={{ display: 'flex', gap: '8px', minWidth: 'min-content' }}>
+          {FILTER_OPTIONS.map((filter) => (
+            <button key={filter.id} onClick={() => toggleFilter(filter.id)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', backgroundColor: selectedFilters.includes(filter.id) ? '#FF6B35' : '#f5f5f5', color: selectedFilters.includes(filter.id) ? 'white' : '#666', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '500', whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
+              <span>{filter.emoji}</span>
+              {filter.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* COMPTEUR RÉSULTATS */}
+      <div style={{ padding: '12px 24px', backgroundColor: '#f9f9f9', borderBottom: '1px solid #e0e0e0', fontSize: '13px', color: '#666', fontWeight: '500' }}>
+        {filteredBars.length} résultat{filteredBars.length > 1 ? 's' : ''}
+      </div>
+
+      {/* CONTENU PRINCIPAL */}
       <div style={{ maxWidth: '600px', margin: '0 auto', padding: '24px 16px', paddingBottom: '120px' }}>
         {activeTab === 'home' && (
           <div>
-            {BARS.map((bar) => (
-              <div key={bar.id} style={{ backgroundColor: '#1a1a1a', borderRadius: '16px', overflow: 'hidden', marginBottom: '20px', border: '2px solid #FF6B35', boxShadow: '0 8px 24px rgba(0, 0, 0, 0.6)' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', padding: '16px', borderBottom: '1px solid #333', backgroundColor: '#0d1117' }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flex: 1, cursor: 'pointer' }} onClick={() => openBarProfile(bar)}>
-                    <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#FF6B35', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', flexShrink: 0, overflow: 'hidden', position: 'relative' }}>
-                      {bar.profilePhoto ? (
-                        <>
-                          <div style={{ position: 'absolute', inset: 0, backgroundColor: '#2a2a2a', display: imageLoading[`profile_${bar.id}`] ? 'flex' : 'none', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>⏳</div>
-                          <img src={bar.profilePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: imageLoading[`profile_${bar.id}`] ? 'none' : 'block' }} onLoad={() => setImageLoading((prev) => ({ ...prev, [`profile_${bar.id}`]: false }))} onError={() => setImageLoading((prev) => ({ ...prev, [`profile_${bar.id}`]: false }))} />
-                        </>
-                      ) : (
-                        bar.emoji
+            {filteredBars.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '48px 24px', color: '#999' }}>
+                <p>Aucun établissement ne correspond à ta recherche</p>
+              </div>
+            ) : (
+              filteredBars.map((bar) => {
+                const post = POSTS.find((p) => p.barId === bar.id)
+                return (
+                  <div key={bar.id} style={{ backgroundColor: '#ffffff', borderRadius: '12px', overflow: 'hidden', marginBottom: '16px', border: '1px solid #e0e0e0', transition: 'all 0.2s', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)' }}>
+                    {/* HEADER CARD - Avatar cliquable séparément */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }} onClick={() => openPostDetail(bar.id)}>
+                      {/* Avatar - cliquable pour profil */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, cursor: 'pointer' }} onClick={(e) => { e.stopPropagation(); openBarProfile(bar); }}>
+                        <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', overflow: 'hidden' }}>
+                          {bar.profilePhoto ? <img src={bar.profilePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : bar.emoji}
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: '600', fontSize: '14px' }}>{bar.name}</div>
+                          <div style={{ fontSize: '12px', color: '#999' }}>📍 {bar.distance}km • {bar.location}</div>
+                        </div>
+                      </div>
+                      {post?.isSpecialOffer && (
+                        <div style={{ backgroundColor: '#ffffff', color: '#FF6B35', padding: '6px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', whiteSpace: 'nowrap', marginLeft: '12px', border: '2px solid #FF6B35' }}>
+                          🎁 OFFRE SPÉCIALE
+                        </div>
                       )}
                     </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '4px' }}>{bar.name}</div>
-                      <div style={{ fontSize: '12px', color: '#888', marginBottom: '8px' }}>à {bar.distance}km</div>
-                      <div style={{ fontSize: '11px', color: '#666' }}>📍 {bar.location}</div>
+
+                    {/* FILTRES TAGS */}
+                    <div style={{ padding: '12px 16px', display: 'flex', gap: '8px', flexWrap: 'wrap', borderBottom: '1px solid #f0f0f0', cursor: 'pointer' }} onClick={() => openPostDetail(bar.id)}>
+                      {bar.filters.map((f) => {
+                        const filter = FILTER_OPTIONS.find((opt) => opt.id === f)
+                        return filter ? (
+                          <div key={f} style={{ backgroundColor: '#f0f0f0', color: '#666', padding: '4px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span>{filter.emoji}</span>
+                            {filter.label}
+                          </div>
+                        ) : null
+                      })}
+                    </div>
+
+                    {/* IMAGE POST */}
+                    <div style={{ width: '100%', height: '240px', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden' }} onClick={() => openPostDetail(bar.id)}>
+                      {bar.postPhoto ? <img src={bar.postPhoto} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : '📸'}
+                    </div>
+
+                    {/* DESCRIPTION */}
+                    <div style={{ padding: '12px 16px', fontSize: '13px', color: '#1a1a1a', borderBottom: '1px solid #f0f0f0', cursor: 'pointer' }} onClick={() => openPostDetail(bar.id)}>
+                      {post?.description}
+                    </div>
+
+                    {/* DÉCOMPTE OFFRE (si offre spéciale) */}
+                    {post?.isSpecialOffer && (
+                      <div style={{ padding: '8px 16px', backgroundColor: '#fff9e6', borderBottom: '1px solid #f0f0f0', fontSize: '12px', color: '#FF6B35', fontWeight: '500', textAlign: 'center', cursor: 'pointer' }} onClick={() => openPostDetail(bar.id)}>
+                        ⏱️ Valable jusqu'à 20h30 aujourd'hui
+                      </div>
+                    )}
+
+                    {/* FOOTER */}
+                    <div style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                      <div style={{ fontSize: '12px', color: '#999', cursor: 'pointer', flex: 1 }} onClick={() => openPostDetail(bar.id)}>📍 Posté à l'instant</div>
+                      <button onClick={() => toggleLike(bar.id)} style={{ padding: '6px 12px', backgroundColor: 'transparent', color: likes[bar.id] ? '#FF6B35' : '#ccc', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontSize: '20px', display: 'inline-block', transition: 'transform 0.3s ease-in-out', transform: likes[bar.id] ? 'scale(1.2)' : 'scale(1)' }}>
+                          {likes[bar.id] ? '❤️' : '🤍'}
+                        </span>
+                        {likeCount[bar.id] || 0}
+                      </button>
                     </div>
                   </div>
-                  <div style={{ backgroundColor: '#1a1a1a', color: '#FFD700', padding: '10px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', whiteSpace: 'nowrap', marginLeft: '12px', textAlign: 'center', boxShadow: '0 4px 16px rgba(255, 215, 0, 0.6)', border: '2px solid #FFD700' }}>
-                    <div style={{ fontSize: '12px', marginBottom: '6px' }}>✨ OFFRE SPÉCIALE ✨</div>
-                    <div style={{ fontSize: '11px', fontWeight: 'normal' }}>2h restantes</div>
-                  </div>
-                </div>
-
-                <div style={{ padding: '12px 16px', display: 'flex', gap: '8px', flexWrap: 'wrap', borderBottom: '1px solid #333', backgroundColor: '#0d1117' }}>
-                  {bar.tags.map((tag) => (
-                    <div key={tag} style={{ backgroundColor: '#FF6B35', color: 'white', padding: '6px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold' }}>
-                      {tag}
-                    </div>
-                  ))}
-                </div>
-
-                <div style={{ padding: '12px 16px', display: 'flex', gap: '8px', flexWrap: 'wrap', borderBottom: '1px solid #333', backgroundColor: '#0d1117' }}>
-                  <div style={{ fontSize: '11px', color: '#888', marginRight: '8px', display: 'flex', alignItems: 'center' }}>📍 Type:</div>
-                  {(typeof bar.type === 'string' ? [bar.type] : bar.type).map((t) => (
-                    <div key={t} style={{ backgroundColor: '#0066FF', color: 'white', padding: '6px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold' }}>
-                      {t}
-                    </div>
-                  ))}
-                </div>
-
-                <div style={{ width: '100%', height: '280px', backgroundColor: '#2a2a2a', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', textAlign: 'center', fontSize: '12px', color: '#666', overflow: 'hidden', borderTop: '3px solid #FF6B35', position: 'relative' }} onClick={() => openPostDetail(bar.id)}>
-                  {bar.postPhoto ? (
-                    <>
-                      <div style={{ position: 'absolute', inset: 0, backgroundColor: '#2a2a2a', display: imageLoading[`post_${bar.id}`] ? 'flex' : 'none', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>⏳</div>
-                      <img src={bar.postPhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: imageLoading[`post_${bar.id}`] ? 'none' : 'block' }} onLoad={() => setImageLoading((prev) => ({ ...prev, [`post_${bar.id}`]: false }))} onError={() => setImageLoading((prev) => ({ ...prev, [`post_${bar.id}`]: false }))} />
-                    </>
-                  ) : (
-                    '📸 Clic pour voir'
-                  )}
-                </div>
-
-                <div style={{ padding: '16px', borderBottom: '1px solid #333', backgroundColor: '#0d1117' }}>
-                  <div style={{ fontSize: '14px', lineHeight: '1.5', color: '#e0e0e0' }}>
-                    {POSTS.find((p) => p.barId === bar.id)?.description}
-                  </div>
-                </div>
-
-                <div style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#0d1117', gap: '12px', flexWrap: 'wrap' }}>
-                  <div style={{ fontSize: '11px', color: '#666' }}>📍 Posté à l'instant</div>
-                  <button onClick={() => toggleLike(bar.id)} style={{ padding: '8px 14px', backgroundColor: likes[bar.id] ? '#FF6B35' : '#333', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s' }}>
-                    {likes[bar.id] ? '❤️' : '🤍'} {likeCount[bar.id] || 0}
-                  </button>
-                </div>
-              </div>
-            ))}
+                )
+              })
+            )}
           </div>
         )}
 
         {activeTab === 'profile' && (
-          <div style={{ backgroundColor: '#1a1a1a', padding: '24px', borderRadius: '12px', textAlign: 'center', border: '2px solid #FF6B35', boxShadow: '0 8px 24px rgba(0, 0, 0, 0.6)' }}>
+          <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', textAlign: 'center', border: '1px solid #e0e0e0' }}>
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>👤</div>
-            <p style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>{email.split('@')[0]}</p>
-            <p style={{ fontSize: '12px', color: '#888', marginBottom: '24px' }}>{email}</p>
-            <button onClick={handleLogout} style={{ width: '100%', padding: '12px', backgroundColor: '#FF6B35', color: 'white', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}>← Se déconnecter</button>
+            <p style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>{email.split('@')[0]}</p>
+            <p style={{ fontSize: '12px', color: '#999', marginBottom: '24px' }}>{email}</p>
+            <button onClick={handleLogout} style={{ width: '100%', padding: '12px', backgroundColor: '#FF6B35', color: 'white', fontWeight: '600', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}>Te déconnecter</button>
           </div>
         )}
       </div>
 
+      {/* MODALES - Profil */}
       {selectedBar && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0, 0, 0, 0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '16px' }} onClick={closeModal}>
-          <div style={{ backgroundColor: '#1a1a1a', borderRadius: '16px', padding: '24px', maxWidth: '500px', width: '100%', border: '2px solid #FF6B35', maxHeight: '90vh', overflow: 'auto' }} onClick={(e) => e.stopPropagation()}>
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'flex-end', zIndex: 1000 }} onClick={closeModal}>
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '16px 16px 0 0', padding: '24px', maxWidth: '600px', width: '100%', maxHeight: '90vh', overflow: 'auto' }} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#FF6B35', margin: 0 }}>{selectedBar.name}</h2>
-              <button onClick={closeModal} style={{ backgroundColor: '#333', color: '#e0e0e0', border: 'none', borderRadius: '6px', padding: '8px 12px', cursor: 'pointer', fontSize: '18px' }}>✕</button>
+              <h2 style={{ fontSize: '20px', fontWeight: '700', margin: 0 }}>{selectedBar.name}</h2>
+              <button onClick={closeModal} style={{ backgroundColor: '#f5f5f5', color: '#666', border: 'none', borderRadius: '6px', padding: '8px 12px', cursor: 'pointer', fontSize: '18px' }}>✕</button>
             </div>
 
             {selectedBar.profilePhoto && (
-              <div style={{ width: '100%', height: '200px', backgroundColor: '#2a2a2a', borderRadius: '8px', marginBottom: '16px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: '100%', height: '180px', backgroundColor: '#f5f5f5', borderRadius: '8px', marginBottom: '16px', overflow: 'hidden' }}>
                 <img src={selectedBar.profilePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
             )}
 
-            <div style={{ backgroundColor: '#0d1117', padding: '16px', borderRadius: '8px', marginBottom: '16px' }}>
-              {selectedBar.title && (
-                <>
-                  <p style={{ fontSize: '12px', color: '#888', margin: '0 0 8px 0' }}>🎯 Offre Spéciale</p>
-                  <p style={{ fontSize: '16px', fontWeight: 'bold', color: '#FFD700', margin: '0 0 8px 0' }}>{selectedBar.title}</p>
-                  {selectedBar.description && (
-                    <p style={{ fontSize: '12px', color: '#ccc', margin: '0 0 16px 0', fontStyle: 'italic' }}>📍 {selectedBar.description}</p>
-                  )}
-                </>
-              )}
+            <div style={{ backgroundColor: '#f9f9f9', padding: '16px', borderRadius: '8px', marginBottom: '16px' }}>
+              <p style={{ fontSize: '12px', color: '#999', margin: '0 0 8px 0' }}>📍 Localisation</p>
+              <p style={{ fontSize: '13px', margin: '0 0 16px 0' }}>{selectedBar.location} • {selectedBar.distance}km</p>
 
-              <p style={{ fontSize: '12px', color: '#888', margin: '0 0 8px 0' }}>🏷️ Type d'établissement</p>
-              <p style={{ margin: '0 0 16px 0', color: '#e0e0e0' }}>
-                {typeof selectedBar.type === 'string' ? selectedBar.type : selectedBar.type.join(' / ')}
-              </p>
+              <p style={{ fontSize: '12px', color: '#999', margin: '0 0 8px 0' }}>📞 Téléphone</p>
+              <p style={{ fontSize: '13px', margin: '0 0 16px 0' }}>{selectedBar.phone}</p>
 
-              <p style={{ fontSize: '12px', color: '#888', margin: '0 0 8px 0' }}>📍 Localisation</p>
-              <p style={{ margin: '0 0 16px 0', color: '#e0e0e0' }}>{selectedBar.location}</p>
+              <p style={{ fontSize: '12px', color: '#999', margin: '0 0 8px 0' }}>📧 Email</p>
+              <p style={{ fontSize: '13px', margin: '0 0 16px 0' }}>{selectedBar.email}</p>
 
-              <p style={{ fontSize: '12px', color: '#888', margin: '0 0 8px 0' }}>📞 Téléphone</p>
-              <p style={{ margin: '0 0 16px 0', color: '#e0e0e0' }}>{selectedBar.phone}</p>
-
-              <p style={{ fontSize: '12px', color: '#888', margin: '0 0 8px 0' }}>📧 Email</p>
-              <p style={{ margin: '0 0 16px 0', color: '#e0e0e0' }}>{selectedBar.email}</p>
-
-              <p style={{ fontSize: '12px', color: '#888', margin: '0 0 8px 0' }}>🌐 Réseaux & Avis</p>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <a href={selectedBar.website} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#FF6B35', color: 'white', padding: '6px 12px', borderRadius: '6px', textDecoration: 'none', fontSize: '11px', fontWeight: 'bold' }}>Site Web</a>
-                <a href={selectedBar.instagram} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#E4405F', color: 'white', padding: '6px 12px', borderRadius: '6px', textDecoration: 'none', fontSize: '11px', fontWeight: 'bold' }}>Instagram</a>
-                <a href={selectedBar.googleMapsUrl} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#4285F4', color: 'white', padding: '6px 12px', borderRadius: '6px', textDecoration: 'none', fontSize: '11px', fontWeight: 'bold' }}>Maps</a>
-                <a href={selectedBar.googleReviewsUrl} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#FBBC04', color: '#000', padding: '6px 12px', borderRadius: '6px', textDecoration: 'none', fontSize: '11px', fontWeight: 'bold' }}>Avis</a>
+                <a href={selectedBar.website} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#FF6B35', color: 'white', padding: '6px 12px', borderRadius: '6px', textDecoration: 'none', fontSize: '11px', fontWeight: '600' }}>Site Web</a>
+                <a href={selectedBar.instagram} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#E4405F', color: 'white', padding: '6px 12px', borderRadius: '6px', textDecoration: 'none', fontSize: '11px', fontWeight: '600' }}>Instagram</a>
+                <a href={selectedBar.googleMapsUrl} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#4285F4', color: 'white', padding: '6px 12px', borderRadius: '6px', textDecoration: 'none', fontSize: '11px', fontWeight: '600' }}>Maps</a>
               </div>
 
-              <p style={{ fontSize: '12px', color: '#888', margin: '0 0 8px 0' }}>❤️ Vous aimez cet établissement?</p>
-              <button 
-                onClick={() => toggleBarLike(selectedBar.id)} 
-                style={{ width: '100%', padding: '12px', backgroundColor: barLikes[selectedBar.id] ? '#FF6B35' : '#333', color: 'white', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', transition: 'all 0.2s', marginBottom: '16px' }}
-              >
+              <button onClick={() => toggleBarLike(selectedBar.id)} style={{ width: '100%', padding: '12px', backgroundColor: barLikes[selectedBar.id] ? '#FF6B35' : '#f5f5f5', color: barLikes[selectedBar.id] ? 'white' : '#666', fontWeight: '600', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', transition: 'all 0.2s' }}>
                 {barLikes[selectedBar.id] ? '❤️ J\'aime (' + (barLikeCount[selectedBar.id] || 0) + ')' : '🤍 J\'aime (' + (barLikeCount[selectedBar.id] || 0) + ')'}
               </button>
             </div>
 
-            <button onClick={closeModal} style={{ width: '100%', padding: '12px', backgroundColor: '#FF6B35', color: 'white', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}>Fermer</button>
+            <button onClick={closeModal} style={{ width: '100%', padding: '12px', backgroundColor: '#FF6B35', color: 'white', fontWeight: '600', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}>Fermer</button>
           </div>
         </div>
       )}
 
+      {/* MODALES - Détail Post ÉPURÉ */}
       {selectedPost && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0, 0, 0, 0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '16px' }} onClick={closeModal}>
-          <div style={{ backgroundColor: '#1a1a1a', borderRadius: '16px', padding: '24px', maxWidth: '500px', width: '100%', border: '2px solid #FF6B35', maxHeight: '90vh', overflow: 'auto' }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#FF6B35', margin: 0 }}>
-                {selectedPost.isSpecialOffer ? '✨ OFFRE SPÉCIALE' : 'Détail du Post'}
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'flex-end', zIndex: 1000 }} onClick={closeModal}>
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '16px 16px 0 0', padding: '24px', maxWidth: '600px', width: '100%', maxHeight: '90vh', overflow: 'auto' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <h2 style={{ fontSize: '16px', fontWeight: '700', margin: 0, color: '#1a1a1a' }}>
+                {selectedPost.isSpecialOffer ? '✨ Offre Spéciale' : 'Détail'}
               </h2>
-              <button onClick={closeModal} style={{ backgroundColor: '#333', color: '#e0e0e0', border: 'none', borderRadius: '6px', padding: '8px 12px', cursor: 'pointer', fontSize: '18px' }}>✕</button>
+              <button onClick={closeModal} style={{ backgroundColor: 'transparent', color: '#666', border: 'none', cursor: 'pointer', fontSize: '24px', padding: 0 }}>✕</button>
             </div>
 
             {selectedPost.isSpecialOffer ? (
-              <div style={{ backgroundColor: '#0d1117', padding: '16px', borderRadius: '8px', marginBottom: '16px' }}>
-                <div style={{ backgroundColor: '#FFD700', color: '#000', padding: '12px', borderRadius: '8px', marginBottom: '16px', textAlign: 'center', fontWeight: 'bold', fontSize: '16px', lineHeight: '1.5' }}>
-                  🎁 {selectedPost.description}
-                </div>
+              <div>
+                {/* Titre offre - simple et épuré */}
+                <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#FF6B35', margin: '0 0 12px 0', lineHeight: '1.4' }}>
+                  {selectedPost.offerTitle}
+                </h3>
 
-                {selectedPost.bar.description && (
-                  <p style={{ fontSize: '12px', color: '#ccc', margin: '0 0 16px 0', fontStyle: 'italic', padding: '12px', backgroundColor: '#1a1a1a', borderRadius: '6px', borderLeft: '3px solid #FFD700' }}>
-                    📍 {selectedPost.bar.description}
-                  </p>
-                )}
-
-                <div style={{ backgroundColor: '#FF6B35', color: 'white', padding: '12px', borderRadius: '8px', marginBottom: '16px', textAlign: 'center', fontSize: '13px', lineHeight: '1.6' }}>
-                  <p style={{ margin: '0 0 8px 0' }}>⚠️ Offre réservée</p>
-                  <p style={{ margin: 0 }}>Limitée à <strong>UNE SEULE UTILISATION</strong> par personne</p>
-                </div>
-
-                <p style={{ fontSize: '14px', color: '#e0e0e0', marginBottom: '16px', textAlign: 'center', lineHeight: '1.6' }}>
-                  <strong>🎯 Rendez-vous au comptoir</strong> de <strong>{selectedPost.bar.name}</strong> et demandez au commerçant le code secret à 4 chiffres.
+                {/* Sous-description - bien visible */}
+                <p style={{ fontSize: '14px', color: '#666', margin: '0 0 24px 0', lineHeight: '1.6', paddingBottom: '16px', borderBottom: '1px solid #e0e0e0' }}>
+                  {selectedPost.offerSubDesc}
                 </p>
 
-                <div style={{ backgroundColor: '#FF6B35', color: 'white', padding: '16px', borderRadius: '8px', marginBottom: '16px', textAlign: 'center' }}>
-                  <p style={{ fontSize: '12px', margin: '0 0 12px 0' }}>🔐 Entrez le code fourni par le commerçant:</p>
-                  <input
-                    type="text"
-                    placeholder="• • • •"
-                    value={codeInput}
-                    onChange={(e) => setCodeInput(e.target.value.slice(0, 4))}
-                    maxLength={4}
-                    style={{ width: '100%', padding: '12px', fontSize: '18px', textAlign: 'center', backgroundColor: '#fff', color: '#FF6B35', border: codeError ? '2px solid #ff4444' : 'none', borderRadius: '6px', marginBottom: '12px', letterSpacing: '8px', fontWeight: 'bold' }}
-                  />
-                  {codeError && <p style={{ color: '#ff4444', fontSize: '12px', margin: '0 0 8px 0' }}>❌ Code incorrect</p>}
-                  <button
-                    onClick={verifyCode}
-                    disabled={codeInput.length < 4 || codeVerified}
-                    style={{ width: '100%', padding: '10px', backgroundColor: codeVerified ? '#00aa00' : '#333', color: 'white', border: 'none', borderRadius: '6px', cursor: codeVerified ? 'default' : 'pointer', fontSize: '12px', fontWeight: 'bold', opacity: codeInput.length < 4 || codeVerified ? 0.6 : 1 }}
-                  >
-                    {codeVerified ? '✅ Code vérifié!' : 'Vérifier le code'}
-                  </button>
+                {/* Instructions - sympa et générique */}
+                <div style={{ backgroundColor: '#f9f9f9', padding: '16px', borderRadius: '8px', marginBottom: '24px', textAlign: 'center', fontSize: '13px', color: '#1a1a1a' }}>
+                  <p style={{ margin: '0 0 8px 0', fontWeight: '500' }}>🎁 Demande le code à ton commerçant</p>
+                  <p style={{ margin: 0, color: '#666' }}>pour profiter de l'offre!</p>
                 </div>
 
-                {codeVerified && (
-                  <div style={{ backgroundColor: '#0d1117', padding: '16px', borderRadius: '8px', marginBottom: '16px' }}>
-                    <p style={{ fontSize: '12px', color: '#888', margin: '0 0 8px 0' }}>🎯 Glissez jusqu'au bout pour valider:</p>
-                    <div style={{ marginBottom: '12px' }}>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={sliderValue}
-                        onChange={(e) => setSliderValue(parseInt(e.target.value))}
-                        style={{ width: '100%', height: '48px', cursor: 'pointer', backgroundColor: '#333', borderRadius: '6px' }}
-                      />
-                    </div>
-                    <p style={{ fontSize: '12px', color: '#FF6B35', textAlign: 'center', fontWeight: 'bold', margin: 0 }}>{sliderValue}%</p>
+                {/* Code input - Pavé numérique */}
+                <div style={{ marginBottom: '24px' }}>
+                  <label style={{ fontSize: '12px', color: '#999', display: 'block', marginBottom: '12px', fontWeight: '500' }}>Code 🔐</label>
+                  
+                  {/* Affichage du code */}
+                  <div style={{ 
+                    width: '100%', 
+                    padding: '16px', 
+                    fontSize: '32px', 
+                    textAlign: 'center', 
+                    backgroundColor: '#f9f9f9', 
+                    color: isCodeCorrect ? '#00aa00' : '#FF6B35',
+                    border: '1px solid ' + (isCodeCorrect ? '#00aa00' : '#e0e0e0'),
+                    borderRadius: '8px',
+                    letterSpacing: '12px',
+                    fontWeight: 'bold',
+                    marginBottom: '16px',
+                    minHeight: '50px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s'
+                  }}>
+                    {codeInput.split('').map((digit, i) => (
+                      <span key={i} style={{ display: 'inline-block', width: '30px' }}>
+                        {digit ? '●' : '○'}
+                      </span>
+                    ))}
                   </div>
-                )}
+
+                  {/* Pavé numérique compact */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', marginBottom: '16px' }}>
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+                      <button
+                        key={num}
+                        onClick={() => codeInput.length < 4 && setCodeInput(codeInput + num)}
+                        style={{
+                          padding: '10px',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          backgroundColor: '#f0f0f0',
+                          color: '#1a1a1a',
+                          border: '1px solid #e0e0e0',
+                          borderRadius: '6px',
+                          cursor: codeInput.length < 4 ? 'pointer' : 'not-allowed',
+                          transition: 'all 0.2s',
+                          opacity: codeInput.length < 4 ? 1 : 0.5
+                        }}
+                        onMouseEnter={(e) => codeInput.length < 4 && (e.currentTarget.style.backgroundColor = '#e0e0e0')}
+                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Row 0 + Effacer */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', marginBottom: '16px' }}>
+                    <button
+                      onClick={() => codeInput.length < 4 && setCodeInput(codeInput + '0')}
+                      style={{
+                        padding: '10px',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        backgroundColor: '#f0f0f0',
+                        color: '#1a1a1a',
+                        border: '1px solid #e0e0e0',
+                        borderRadius: '6px',
+                        cursor: codeInput.length < 4 ? 'pointer' : 'not-allowed',
+                        transition: 'all 0.2s',
+                        opacity: codeInput.length < 4 ? 1 : 0.5,
+                        gridColumn: '1 / 2'
+                      }}
+                      onMouseEnter={(e) => codeInput.length < 4 && (e.currentTarget.style.backgroundColor = '#e0e0e0')}
+                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
+                    >
+                      0
+                    </button>
+                    
+                    <div></div>
+                    
+                    <button
+                      onClick={() => setCodeInput(codeInput.slice(0, -1))}
+                      style={{
+                        padding: '10px',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        backgroundColor: '#FF6B35',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#E55A28')}
+                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#FF6B35')}
+                    >
+                      ⌫
+                    </button>
+                  </div>
+
+                  {/* Messages - seulement après 4 chiffres */}
+                  {codeInput.length === 4 && !isCodeCorrect && (
+                    <p style={{ fontSize: '12px', color: '#ff4444', margin: '8px 0 0 0', textAlign: 'center' }}>❌ Code incorrect</p>
+                  )}
+                  {isCodeCorrect && (
+                    <p style={{ fontSize: '12px', color: '#00aa00', margin: '8px 0 0 0', textAlign: 'center' }}>✅ Code correct!</p>
+                  )}
+                </div>
+
+                {/* Bouton Valider - grisé si code incorrect */}
+                <button 
+                  onClick={completeOffer}
+                  disabled={!isCodeCorrect}
+                  style={{ 
+                    width: '100%', 
+                    padding: '14px', 
+                    backgroundColor: isCodeCorrect ? '#FF6B35' : '#e0e0e0',
+                    color: isCodeCorrect ? 'white' : '#999',
+                    fontWeight: '600', 
+                    border: 'none', 
+                    borderRadius: '8px', 
+                    cursor: isCodeCorrect ? 'pointer' : 'not-allowed', 
+                    fontSize: '14px',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  {isCodeCorrect ? '✅ Valide ton offre (+25 pts)' : 'Valide ton offre'}
+                </button>
               </div>
             ) : (
-              <div style={{ backgroundColor: '#0d1117', padding: '16px', borderRadius: '8px', marginBottom: '16px' }}>
-                <p style={{ fontSize: '12px', color: '#888', margin: '0 0 8px 0' }}>📍 Établissement</p>
-                <p style={{ fontSize: '16px', fontWeight: 'bold', color: '#FF6B35', margin: '0 0 16px 0' }}>{selectedPost.bar.name}</p>
+              <div>
+                <p style={{ fontSize: '12px', color: '#999', margin: '0 0 8px 0' }}>Établissement</p>
+                <p style={{ fontSize: '14px', fontWeight: '600', color: '#FF6B35', margin: '0 0 16px 0' }}>{selectedPost.bar.name}</p>
 
-                <p style={{ fontSize: '12px', color: '#888', margin: '0 0 8px 0' }}>🎯 Offre</p>
-                <p style={{ fontSize: '16px', color: '#e0e0e0', margin: '0', lineHeight: '1.6' }}>{selectedPost.description}</p>
+                <p style={{ fontSize: '12px', color: '#999', margin: '0 0 8px 0' }}>Offre</p>
+                <p style={{ fontSize: '13px', color: '#1a1a1a', margin: 0 }}>{selectedPost.description}</p>
               </div>
             )}
-
-            {codeVerified && sliderValue === 100 && (
-              <button onClick={completeOffer} style={{ width: '100%', padding: '12px', backgroundColor: '#00aa00', color: 'white', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', marginBottom: '12px' }}>✅ Valider l'offre (+25 points)</button>
-            )}
-
-            <button onClick={closeModal} style={{ width: '100%', padding: '12px', backgroundColor: '#FF6B35', color: 'white', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}>Fermer</button>
           </div>
         </div>
       )}
 
-      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#161b22', borderTop: '2px solid #FF6B35', display: 'flex', justifyContent: 'space-around', zIndex: 100 }}>
-        <div style={{ flex: 1, padding: '16px 8px', textAlign: 'center', color: activeTab === 'home' ? '#FF6B35' : '#888', cursor: 'pointer', fontSize: '12px' }} onClick={() => setActiveTab('home')}>
-          <div style={{ fontSize: '24px', marginBottom: '4px' }}>🏠</div><div>Accueil</div>
-        </div>
-        <div style={{ flex: 1, padding: '16px 8px', textAlign: 'center', color: '#888', cursor: 'not-allowed', fontSize: '12px', opacity: 0.5 }}>
-          <div style={{ fontSize: '24px', marginBottom: '4px' }}>⭐</div><div>À la une</div>
-        </div>
-        <div style={{ flex: 1, padding: '16px 8px', textAlign: 'center', color: '#888', cursor: 'not-allowed', fontSize: '12px', opacity: 0.5 }}>
-          <div style={{ fontSize: '24px', marginBottom: '4px' }}>💖</div><div>Coups</div>
-        </div>
-        <div style={{ flex: 1, padding: '16px 8px', textAlign: 'center', color: activeTab === 'profile' ? '#FF6B35' : '#888', cursor: 'pointer', fontSize: '12px' }} onClick={() => setActiveTab('profile')}>
-          <div style={{ fontSize: '24px', marginBottom: '4px' }}>👤</div><div>Profil</div>
-        </div>
+      {/* BOTTOM NAV */}
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#ffffff', borderTop: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-around', zIndex: 100 }}>
+        <button onClick={() => setActiveTab('home')} style={{ flex: 1, padding: '16px', textAlign: 'center', color: activeTab === 'home' ? '#FF6B35' : '#999', backgroundColor: 'transparent', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: '600', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', transition: 'color 0.2s' }}>
+          <span style={{ fontSize: '20px' }}>🏠</span>Accueil
+        </button>
+        <button onClick={() => setActiveTab('profile')} style={{ flex: 1, padding: '16px', textAlign: 'center', color: activeTab === 'profile' ? '#FF6B35' : '#999', backgroundColor: 'transparent', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: '600', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', transition: 'color 0.2s' }}>
+          <span style={{ fontSize: '20px' }}>👤</span>Profil
+        </button>
       </div>
     </div>
   )
