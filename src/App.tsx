@@ -38,7 +38,7 @@ const heartAnimationStyle = `
       opacity: 1;
     }
     100% {
-      transform: translateY(-400px) translateX(var(--tx, 0)) scale(0);
+      transform: translateY(-150px) translateX(var(--tx, ${Math.random() * 100 - 50}px)) scale(0);
       opacity: 0;
     }
   }
@@ -47,13 +47,6 @@ const heartAnimationStyle = `
     position: fixed;
     pointer-events: none;
     animation: confetti-fall 2.5s ease-in forwards;
-  }
-
-  .floating-heart {
-    position: fixed;
-    pointer-events: none;
-    font-size: 32px;
-    animation: heart-float 2s ease-out forwards;
   }
 `
 
@@ -403,11 +396,27 @@ export default function App() {
                     {/* FOOTER */}
                     <div style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
                       <div style={{ fontSize: '12px', color: '#999', cursor: 'pointer', flex: 1 }} onClick={() => openPostDetail(bar.id)}>📍 Posté à l'instant</div>
-                      <button onClick={() => toggleLike(bar.id)} style={{ padding: '6px 12px', backgroundColor: 'transparent', color: likes[bar.id] ? '#FF6B35' : '#ccc', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ fontSize: '20px', display: 'inline-block', transition: 'transform 0.3s ease-in-out', transform: likes[bar.id] ? 'scale(1.2)' : 'scale(1)' }}>
+                      <button onClick={() => toggleLike(bar.id)} style={{ padding: '6px 12px', backgroundColor: 'transparent', color: likes[bar.id] ? '#FF6B35' : '#ccc', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', transition: 'all 0.3s', display: 'flex', alignItems: 'center', gap: '6px', position: 'relative' }}>
+                        <span style={{ fontSize: '20px', display: 'inline-block', transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)', transform: likes[bar.id] ? 'scale(1.3) rotate(0deg)' : 'scale(1)', filter: likes[bar.id] ? 'drop-shadow(0 0 8px rgba(255, 107, 53, 0.6))' : 'none' }}>
                           {likes[bar.id] ? '❤️' : '🤍'}
                         </span>
                         {likeCount[bar.id] || 0}
+                        {/* Coeurs flottants au like */}
+                        {likes[bar.id] && [...Array(3)].map((_, i) => (
+                          <div
+                            key={`like-heart-${i}`}
+                            style={{
+                              position: 'fixed',
+                              pointerEvents: 'none',
+                              fontSize: '20px',
+                              left: 'calc(100% - 60px)',
+                              top: 'calc(100% - 20px)',
+                              animation: `heart-float 1.5s ease-out ${i * 0.2}s forwards`,
+                            }}
+                          >
+                            ❤️
+                          </div>
+                        ))}
                       </button>
                     </div>
                   </div>
@@ -640,10 +649,10 @@ export default function App() {
         </div>
       )}
 
-      {/* CELEBRATION ANIMATION - Confettis + Coeurs */}
+      {/* CELEBRATION ANIMATION - Confettis à la validation */}
       {showCelebration && (
         <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 2000 }}>
-          {/* Confettis */}
+          {/* Confettis - 30 pièces */}
           {[...Array(30)].map((_, i) => (
             <div
               key={`confetti-${i}`}
@@ -658,23 +667,6 @@ export default function App() {
                 animationDelay: `${i * 0.05}s`,
               }}
             />
-          ))}
-
-          {/* Coeurs volants */}
-          {[...Array(12)].map((_, i) => (
-            <div
-              key={`heart-${i}`}
-              className="floating-heart"
-              style={{
-                left: '50%',
-                top: '50%',
-                '--tx': `${(Math.random() - 0.5) * 400}px`,
-                animationDelay: `${i * 0.1}s`,
-                marginLeft: '-16px',
-              }}
-            >
-              ❤️
-            </div>
           ))}
 
           {/* Message de célébration */}
