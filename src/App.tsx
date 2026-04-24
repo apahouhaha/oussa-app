@@ -333,7 +333,10 @@ export default function App() {
                     {/* FOOTER */}
                     <div style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
                       <div style={{ fontSize: '12px', color: '#999', cursor: 'pointer', flex: 1 }} onClick={() => openPostDetail(bar.id)}>📍 Posté à l'instant</div>
-                      <button onClick={() => toggleLike(bar.id)} style={{ padding: '6px 12px', backgroundColor: 'transparent', color: likes[bar.id] ? '#FF6B35' : '#ccc', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', transition: 'all 0.3s', display: 'flex', alignItems: 'center', gap: '6px', position: 'relative' }}>
+                      <button onClick={(e) => {
+  const rect = (e.target as HTMLElement).getBoundingClientRect()
+  toggleLike(bar.id, rect.left + rect.width / 2, rect.top + rect.height / 2)
+}} style={{ padding: '6px 12px', backgroundColor: 'transparent', color: likes[bar.id] ? '#FF6B35' : '#ccc', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', transition: 'all 0.3s', display: 'flex', alignItems: 'center', gap: '6px', position: 'relative' }}>
                         <span style={{ fontSize: '20px', display: 'inline-block', transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)', transform: likes[bar.id] ? 'scale(1.3) rotate(0deg)' : 'scale(1)', filter: likes[bar.id] ? 'drop-shadow(0 0 8px rgba(255, 107, 53, 0.6))' : 'none' }}>
                           {likes[bar.id] ? '❤️' : '🤍'}
                         </span>
