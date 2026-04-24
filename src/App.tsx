@@ -77,7 +77,6 @@ const heartAnimationStyle = `
                                                                                                 pointer-events: none;
                                                                                                     user-select: none;
                                                                                                         animation: floatHearts 2s ease-out forwards;
-                                                                                                            color: #FF6B35;
                                                                                                                 left: 50%;
                                                                                                                     bottom: 20px;
                                                                                                                         transform: translateX(-50%);
