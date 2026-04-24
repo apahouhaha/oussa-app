@@ -1,5 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
 
+// ===== IMPORTS DES FICHIERS MODULAIRES =====
+import { FILTERS } from './data/filters'
+import { CATEGORIES } from './data/categories'
+import { BARS } from './data/bars'
+import { POSTS } from './data/posts'
+import { COLORS } from './constants/styles'
+
 // Style global pour l'animation du coeur
 const heartAnimationStyle = `
   @keyframes heartPulse {
@@ -42,6 +49,41 @@ const heartAnimationStyle = `
       opacity: 0;
     }
   }
+
+    /* ===== NOUVELLE ANIMATION COEUR SPECTACULAIRE ===== */
+      @keyframes floatHearts {
+          0% {
+                opacity: 1;
+                      transform: translateY(0) scale(1);
+                            filter: drop-shadow(0 0 10px rgba(255, 107, 53, 0.8));
+                                }
+                                    50% {
+                                          filter: drop-shadow(0 0 20px rgba(255, 107, 53, 1));
+                                              }
+                                                  100% {
+                                                        opacity: 0;
+                                                              transform: translateY(-100vh) scale(0.5);
+                                                                    filter: drop-shadow(0 0 5px rgba(255, 107, 53, 0.2));
+                                                                        }
+                                                                          }
+
+                                                                            .heart-float {
+                                                                                position: fixed;
+                                                                                    font-size: 32px;
+                                                                                        font-weight: bold;
+                                                                                            z-index: 9999;
+                                                                                                pointer-events: none;
+                                                                                                    user-select: none;
+                                                                                                        animation: floatHearts 2s ease-out forwards;
+                                                                                                            color: #FF6B35;
+                                                                                                                left: 50%;
+                                                                                                                    bottom: 20px;
+                                                                                                                        transform: translateX(-50%);
+                                                                                                                          }
+                                                                                                                          
+                                                                                                                            .heart-float-1 { animation-delay: 0ms; }
+                                                                                                                              .heart-float-2 { animation-delay: 100ms; }
+                                                                                                                                .heart-float-3 { animation-delay: 200ms; }
 
   .confetti {
     position: fixed;
@@ -180,6 +222,7 @@ export default function App() {
   const [barLikes, setBarLikes] = useState<{ [key: number]: boolean }>({})
   const [barLikeCount, setBarLikeCount] = useState<{ [key: number]: number }>({})
   const [showCelebration, setShowCelebration] = useState(false)
+    const [floatingHearts, setFloatingHearts] = useState<number[]>([])
 
   useEffect(() => {
     const likesCounts: { [key: number]: number } = {}
