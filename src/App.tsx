@@ -339,21 +339,19 @@ export default function App() {
                         </span>
                         {likeCount[bar.id] || 0}
                         {/* Coeurs flottants au like */}
-                        {likes[bar.id] && [...Array(3)].map((_, i) => (
-                          <div
-                            key={`like-heart-${i}`}
-                            style={{
-                              position: 'fixed',
-                              pointerEvents: 'none',
-                              fontSize: '20px',
-                              left: 'calc(100% - 60px)',
-                              top: 'calc(100% - 20px)',
-                              animation: `heart-float 1.5s ease-out ${i * 0.2}s forwards`,
-                            }}
-                          >
-                            ❤️
-                          </div>
-                        ))}
+                        {floatingHearts.map((heart, idx) => (
+  <div 
+    key={heart.id} 
+    className={`heart-float heart-float-${(idx % 7) + 1}`}
+    style={{
+      left: `${heart.startX}px`,
+      top: `${heart.startY}px`,
+      fontSize: `${heart.size}px`,
+    }}
+  >
+    ❤️
+  </div>
+))}
                       </button>
                     </div>
                   </div>
