@@ -1,15 +1,15 @@
-﻿import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 const BARS = [
-  { id: 1, name: 'La Dame Jeanne', type: 'Cave à bières', location: 'Mouvaux', rating: 4.8, distance: 0.5 },
-  { id: 2, name: 'Le Rallye', type: 'Bar traditionnel', location: 'Croix', rating: 4.5, distance: 1.2 },
-  { id: 3, name: 'Thida Angkor Bar', type: 'Bar exotique', location: 'Roubaix', rating: 4.3, distance: 2.1 },
-  { id: 4, name: 'Drops', type: 'Cocktail bar', location: 'Lys-lez-Lannoy', rating: 4.9, distance: 1.8 },
-  { id: 5, name: 'Le Comptoir', type: 'Bar chic', location: 'Mouvaux', rating: 4.7, distance: 0.8 },
-  { id: 6, name: 'La Brasserie', type: 'Brasserie', location: 'Croix', rating: 4.4, distance: 1.5 },
-  { id: 7, name: 'Café Moderne', type: 'Café bar', location: 'Roubaix', rating: 4.2, distance: 2.3 },
-  { id: 8, name: 'Le Brassin', type: 'Micro-brasserie', location: 'Mouvaux', rating: 4.6, distance: 0.3 },
-  { id: 9, name: 'Bistro du Coin', type: 'Bistrot', location: 'Lys-lez-Lannoy', rating: 4.1, distance: 1.9 },
+  { id: 1, name: 'La Dame Jeanne', type: 'Cave à bières', location: 'Mouvaux', rating: 4.8, distance: 0.5, emoji: '🍻', tags: ['Terrasse', 'Parking'] },
+  { id: 2, name: 'Le Rallye', type: 'Bar traditionnel', location: 'Croix', rating: 4.5, distance: 1.2, emoji: '🎲', tags: ['Métro', 'Happy Hour'] },
+  { id: 3, name: 'Thida Angkor Bar', type: 'Bar exotique', location: 'Roubaix', rating: 4.3, distance: 2.1, emoji: '🌏', tags: ['Terrasse', 'Métro'] },
+  { id: 4, name: 'Drops', type: 'Cocktail bar', location: 'Lys-lez-Lannoy', rating: 4.9, distance: 1.8, emoji: '💧', tags: ['Happy Hour', 'Parking'] },
+  { id: 5, name: 'Le Comptoir', type: 'Bar chic', location: 'Mouvaux', rating: 4.7, distance: 0.8, emoji: '🍷', tags: ['Terrasse'] },
+  { id: 6, name: 'La Brasserie', type: 'Brasserie', location: 'Croix', rating: 4.4, distance: 1.5, emoji: '🍺', tags: ['Terrasse', 'Happy Hour'] },
+  { id: 7, name: 'Café Moderne', type: 'Café bar', location: 'Roubaix', rating: 4.2, distance: 2.3, emoji: '☕', tags: ['Métro', 'Parking'] },
+  { id: 8, name: 'Le Brassin', type: 'Micro-brasserie', location: 'Mouvaux', rating: 4.6, distance: 0.3, emoji: '🏭', tags: ['Terrasse'] },
+  { id: 9, name: 'Bistro du Coin', type: 'Bistrot', location: 'Tourcoing', rating: 4.1, distance: 1.9, emoji: '🍽️', tags: ['Happy Hour', 'Métro'] },
 ]
 
 export default function App() {
@@ -17,12 +17,15 @@ export default function App() {
   const [email, setEmail] = useState('test@example.com')
   const [activeTab, setActiveTab] = useState('home')
   const [barPhotos, setBarPhotos] = useState<{ [key: number]: { profile?: string; post?: string } }>({})
+  const [likes, setLikes] = useState<{ [key: number]: boolean }>({})
+  const [likeCount, setLikeCount] = useState<{ [key: number]: number }>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploadingBarId, setUploadingBarId] = useState<number | null>(null)
   const [uploadingType, setUploadingType] = useState<'profile' | 'post' | null>(null)
 
   useEffect(() => {
     const photos: { [key: number]: { profile?: string; post?: string } } = {}
+    const likesCounts: { [key: number]: number } = {}
     BARS.forEach((bar) => {
       const stored = localStorage.getItem(`bar_photos_${bar.id}`)
       if (stored) {
@@ -32,8 +35,10 @@ export default function App() {
           console.error('Parse error:', e)
         }
       }
+      likesCounts[bar.id] = parseInt(localStorage.getItem(`bar_likes_${bar.id}`) || '0')
     })
     setBarPhotos(photos)
+    setLikeCount(likesCounts)
   }, [])
 
   const handleLogin = () => {
@@ -65,6 +70,25 @@ export default function App() {
     reader.readAsDataURL(file)
   }
 
+  const toggleLike = (barId: number) => {
+    setLikes((prev) => {
+      const newLikes = { ...prev }
+      newLikes[barId] = !newLikes[barId]
+      return newLikes
+    })
+    setLikeCount((prev) => {
+      const newCount = { ...prev }
+      newCount[barId] = (newCount[barId] || 0) + (likes[barId] ? -1 : 1)
+      localStorage.setItem(`bar_likes_${barId}`, String(newCount[barId]))
+      return newCount
+    })
+  }
+
+  const formatTime = () => {
+    const now = new Date()
+    return now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+  }
+
   if (!user) {
     return (
       <div style={{ minHeight: '100vh', backgroundColor: '#0d1117', color: '#e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -91,24 +115,65 @@ export default function App() {
           <div>
             {BARS.map((bar) => (
               <div key={bar.id} style={{ backgroundColor: '#1a1a1a', borderRadius: '12px', overflow: 'hidden', marginBottom: '24px', border: '1px solid #333' }}>
-                <div style={{ display: 'flex', alignItems: 'center', padding: '16px', borderBottom: '1px solid #333' }}>
-                  <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#FF6B35', marginRight: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', cursor: 'pointer', flexShrink: 0 }} onClick={() => handlePhotoUpload(bar.id, 'profile')}>
-                    {barPhotos[bar.id]?.profile ? <img src={barPhotos[bar.id].profile} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} /> : '📍'}
+                <div style={{ display: 'flex', alignItems: 'flex-start', padding: '16px', borderBottom: '1px solid #333' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flex: 1 }}>
+                    <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#FF6B35', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', cursor: 'pointer', flexShrink: 0, overflow: 'hidden' }} onClick={() => handlePhotoUpload(bar.id, 'profile')}>
+                      {barPhotos[bar.id]?.profile ? <img src={barPhotos[bar.id].profile} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : bar.emoji}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '4px' }}>{bar.name}</div>
+                      <div style={{ fontSize: '12px', color: '#888', marginBottom: '8px' }}>à {bar.distance}km</div>
+                      <div style={{ fontSize: '11px', color: '#666' }}>📍 {bar.location}</div>
+                    </div>
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>{bar.name}</div>
-                    <div style={{ fontSize: '12px', color: '#888' }}>{bar.type} • {bar.distance}km</div>
+                  <div style={{ backgroundColor: '#FFD700', color: '#000', padding: '6px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold', whiteSpace: 'nowrap', marginLeft: '12px', textAlign: 'center' }}>
+                    <div>Offre spéciale OUSSA</div>
+                    <div style={{ fontSize: '10px', fontWeight: 'normal', marginTop: '2px' }}>2h restantes</div>
                   </div>
                 </div>
 
-                <div style={{ width: '100%', height: '200px', backgroundColor: '#2a2a2a', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '16px', textAlign: 'center', fontSize: '12px', color: '#666' }} onClick={() => handlePhotoUpload(bar.id, 'post')}>
+                <div style={{ padding: '8px 16px', display: 'flex', gap: '8px', flexWrap: 'wrap', borderBottom: '1px solid #333', backgroundColor: '#0d1117' }}>
+                  {bar.tags.map((tag) => (
+                    <div key={tag} style={{ backgroundColor: '#FF00FF', color: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold' }}>
+                      {tag}
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ width: '100%', height: '280px', backgroundColor: '#2a2a2a', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', textAlign: 'center', fontSize: '12px', color: '#666', overflow: 'hidden' }} onClick={() => handlePhotoUpload(bar.id, 'post')}>
                   {barPhotos[bar.id]?.post ? <img src={barPhotos[bar.id].post} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : '📸 Clic pour ajouter'}
                 </div>
 
-                <div style={{ padding: '16px' }}>
-                  <div style={{ marginBottom: '12px' }}>⭐ {bar.rating}</div>
-                  <button style={{ padding: '8px 12px', backgroundColor: '#FF6B35', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', marginRight: '8px' }} onClick={() => handlePhotoUpload(bar.id, 'profile')}>📷 Photo</button>
-                  <button style={{ padding: '8px 12px', backgroundColor: '#FF6B35', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px' }} onClick={() => handlePhotoUpload(bar.id, 'post')}>📸 Post</button>
+                <div style={{ padding: '16px', borderBottom: '1px solid #333' }}>
+                  <div style={{ fontSize: '14px', lineHeight: '1.4', color: '#e0e0e0' }}>
+                    {bar.id === 1 && '2 menus adulte achetés = 1 menu enfant offert 🎁'}
+                    {bar.id === 2 && 'Happy hour 17h-19h: -30% sur les bières 🍻'}
+                    {bar.id === 3 && 'Terrasse disponible maintenant! ☀️'}
+                    {bar.id === 4 && 'Cocktails signature à 8€ tout le mois 🍹'}
+                    {bar.id === 5 && 'Apéritif dinatoire gratuit à partir de 20h ✨'}
+                    {bar.id === 6 && 'Bière artisanale à découvrir cette semaine 🏭'}
+                    {bar.id === 7 && 'Café gourmand à moitié prix jusqu\'à 17h ☕'}
+                    {bar.id === 8 && 'Nouvelle micro-brasserie à tester 🔥'}
+                    {bar.id === 9 && 'Réservations possibles pour 4+ personnes 📞'}
+                  </div>
+                </div>
+
+                <div style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#0d1117', gap: '12px', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ backgroundColor: '#0066FF', color: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold' }}>
+                      {bar.type}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#888' }}>⭐ {bar.rating}</div>
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#666' }}>{formatTime()}</div>
+                  <button onClick={() => toggleLike(bar.id)} style={{ padding: '6px 12px', backgroundColor: likes[bar.id] ? '#FF6B35' : '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    {likes[bar.id] ? '❤️' : '🤍'} {likeCount[bar.id] || 0}
+                  </button>
+                </div>
+
+                <div style={{ padding: '12px 16px', display: 'flex', gap: '8px' }}>
+                  <button style={{ flex: 1, padding: '8px 12px', backgroundColor: '#FF6B35', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }} onClick={() => handlePhotoUpload(bar.id, 'profile')}>📷 Profil</button>
+                  <button style={{ flex: 1, padding: '8px 12px', backgroundColor: '#FF6B35', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }} onClick={() => handlePhotoUpload(bar.id, 'post')}>📸 Post</button>
                 </div>
               </div>
             ))}
