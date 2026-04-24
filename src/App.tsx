@@ -115,7 +115,9 @@ export default function App() {
           <div>
             {BARS.map((bar) => (
               <div key={bar.id} style={{ backgroundColor: '#1a1a1a', borderRadius: '12px', overflow: 'hidden', marginBottom: '24px', border: '1px solid #333' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', padding: '16px', borderBottom: '1px solid #333' }}>
+                
+                {/* HEADER: Avatar + Info + Promo Badge */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', padding: '16px', borderBottom: '1px solid #333', position: 'relative' }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flex: 1 }}>
                     <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#FF6B35', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', cursor: 'pointer', flexShrink: 0, overflow: 'hidden' }} onClick={() => handlePhotoUpload(bar.id, 'profile')}>
                       {barPhotos[bar.id]?.profile ? <img src={barPhotos[bar.id].profile} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : bar.emoji}
@@ -126,12 +128,15 @@ export default function App() {
                       <div style={{ fontSize: '11px', color: '#666' }}>📍 {bar.location}</div>
                     </div>
                   </div>
+
                   <div style={{ backgroundColor: '#FFD700', color: '#000', padding: '6px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold', whiteSpace: 'nowrap', marginLeft: '12px', textAlign: 'center' }}>
-                    <div>Offre spéciale OUSSA</div>
+                    <div>Offre spéciale</div>
+                    <div style={{ fontSize: '10px', fontWeight: 'normal' }}>OUSSA</div>
                     <div style={{ fontSize: '10px', fontWeight: 'normal', marginTop: '2px' }}>2h restantes</div>
                   </div>
                 </div>
 
+                {/* TAGS */}
                 <div style={{ padding: '8px 16px', display: 'flex', gap: '8px', flexWrap: 'wrap', borderBottom: '1px solid #333', backgroundColor: '#0d1117' }}>
                   {bar.tags.map((tag) => (
                     <div key={tag} style={{ backgroundColor: '#FF00FF', color: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold' }}>
@@ -140,12 +145,14 @@ export default function App() {
                   ))}
                 </div>
 
-                <div style={{ width: '100%', height: '280px', backgroundColor: '#2a2a2a', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', textAlign: 'center', fontSize: '12px', color: '#666', overflow: 'hidden' }} onClick={() => handlePhotoUpload(bar.id, 'post')}>
+                {/* POST IMAGE */}
+                <div style={{ width: '100%', height: '280px', backgroundColor: '#2a2a2a', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '16px', textAlign: 'center', fontSize: '12px', color: '#666', overflow: 'hidden' }} onClick={() => handlePhotoUpload(bar.id, 'post')}>
                   {barPhotos[bar.id]?.post ? <img src={barPhotos[bar.id].post} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : '📸 Clic pour ajouter'}
                 </div>
 
+                {/* DESCRIPTION */}
                 <div style={{ padding: '16px', borderBottom: '1px solid #333' }}>
-                  <div style={{ fontSize: '14px', lineHeight: '1.4', color: '#e0e0e0' }}>
+                  <div style={{ fontSize: '14px', lineHeight: '1.4', marginBottom: '12px', color: '#e0e0e0' }}>
                     {bar.id === 1 && '2 menus adulte achetés = 1 menu enfant offert 🎁'}
                     {bar.id === 2 && 'Happy hour 17h-19h: -30% sur les bières 🍻'}
                     {bar.id === 3 && 'Terrasse disponible maintenant! ☀️'}
@@ -158,6 +165,7 @@ export default function App() {
                   </div>
                 </div>
 
+                {/* TYPE + RATING + TIME + LIKE BUTTON */}
                 <div style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#0d1117', gap: '12px', flexWrap: 'wrap' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <div style={{ backgroundColor: '#0066FF', color: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold' }}>
@@ -165,15 +173,20 @@ export default function App() {
                     </div>
                     <div style={{ fontSize: '12px', color: '#888' }}>⭐ {bar.rating}</div>
                   </div>
-                  <div style={{ fontSize: '11px', color: '#666' }}>{formatTime()}</div>
+
+                  <div style={{ fontSize: '11px', color: '#666' }}>
+                    {formatTime()}
+                  </div>
+
                   <button onClick={() => toggleLike(bar.id)} style={{ padding: '6px 12px', backgroundColor: likes[bar.id] ? '#FF6B35' : '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
                     {likes[bar.id] ? '❤️' : '🤍'} {likeCount[bar.id] || 0}
                   </button>
                 </div>
 
+                {/* UPLOAD BUTTONS */}
                 <div style={{ padding: '12px 16px', display: 'flex', gap: '8px' }}>
-                  <button style={{ flex: 1, padding: '8px 12px', backgroundColor: '#FF6B35', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }} onClick={() => handlePhotoUpload(bar.id, 'profile')}>📷 Profil</button>
-                  <button style={{ flex: 1, padding: '8px 12px', backgroundColor: '#FF6B35', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }} onClick={() => handlePhotoUpload(bar.id, 'post')}>📸 Post</button>
+                  <button style={{ flex: 1, padding: '8px 12px', backgroundColor: '#FF6B35', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }} onClick={() => handlePhotoUpload(bar.id, 'profile')}>📷 Photo profil</button>
+                  <button style={{ flex: 1, padding: '8px 12px', backgroundColor: '#FF6B35', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }} onClick={() => handlePhotoUpload(bar.id, 'post')}>📸 Photo post</button>
                 </div>
               </div>
             ))}
