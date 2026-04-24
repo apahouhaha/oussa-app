@@ -5,7 +5,7 @@ export type Filter = {
 }
 
 export const FILTERS: Filter[] = [
-  { id: 'offers', emoji: '🎁', label: 'Offres' },
+  { id: 'offers', emoji: '🎁', label: 'Offres spéciales' },
   { id: 'open', emoji: '⏰', label: 'Ouvert' },
   { id: 'nearby', emoji: '📍', label: '< 500m' },
   { id: 'terrasse', emoji: '☀️', label: 'Terrasse' },
@@ -19,4 +19,4 @@ export const FILTERS: Filter[] = [
   { id: 'concerts', emoji: '🎵', label: 'Concerts' },
 ]
 
-// IMPORTANT: Filter "Offres" cherche dans POSTS.isSpecialOffer, pas dans bar.filters!
+// IMPORTANT: Filter "Offres spéciales" cherche dans POSTS.isSpecialOffer, pas dans bar.filters!

@@ -6,6 +6,8 @@ import { CATEGORIES } from './data/categories'
 import { BARS } from './data/bars'
 import { POSTS } from './data/posts'
 import { COLORS } from './constants/styles'
+import { useHeartAnimation } from './hooks/useHeartAnimation'
+import { HEART_ANIMATIONS_CSS } from './constants/heartAnimations'
 
 // Style global pour l'animation du coeur
 const heartAnimationStyle = `
@@ -114,7 +116,7 @@ export default function App() {
   const [barLikes, setBarLikes] = useState<{ [key: number]: boolean }>({})
   const [barLikeCount, setBarLikeCount] = useState<{ [key: number]: number }>({})
   const [showCelebration, setShowCelebration] = useState(false)
-  const [floatingHearts, setFloatingHearts] = useState<number[]>([])
+  const { floatingHearts, createHearts } = useHeartAnimation()
 
   useEffect(() => {
     const likesCounts: { [key: number]: number } = {}
