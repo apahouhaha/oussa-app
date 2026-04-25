@@ -309,7 +309,7 @@ export default function App() {
     </span>
     {likeCount[bar.id] || 0}
   </button>
-  
+
   {/* Coeurs flottants au like */}
   {floatingHearts.map((heart, idx) => (
     <div 
