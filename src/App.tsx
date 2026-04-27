@@ -61,6 +61,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('home')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedFilters, setSelectedFilters] = useState<string[]>([])
+  const [searchTerm, setSearchTerm] = useState('')
   const [likes, setLikes] = useState<{ [key: number]: boolean }>({})
   const [likeCount, setLikeCount] = useState<{ [key: number]: number }>({})
   const [selectedBar, setSelectedBar] = useState<any>(null)
@@ -131,13 +132,20 @@ export default function App() {
   }
 
   const filteredBars = BARS.filter((bar) => {
+    // Recherche par nom seulement
+    const searchLower = searchTerm.toLowerCase()
+    const matchesSearch = bar.name.toLowerCase().includes(searchLower)
+
+    if (!matchesSearch) return false
+
+    // Catégorie
     if (selectedCategory && bar.category !== selectedCategory) return false
 
-    // Vérifier les filtres "normaux"
+    // Filtres AND logic
     const normalFilters = selectedFilters.filter(f => f !== 'offers')
     if (normalFilters.length > 0 && !normalFilters.every((f) => bar.filters.includes(f))) return false
 
-    // Vérifier le filtre "Offres spéciales" dans POSTS
+    // Filtre "Offres spéciales" dans POSTS
     if (selectedFilters.includes('offers')) {
       const hasOffer = POSTS.some(post => post.barId === bar.id && post.isSpecialOffer)
       if (!hasOffer) return false
@@ -197,7 +205,13 @@ export default function App() {
           <div style={{ fontSize: '12px', color: '#666' }}>📍 Mouvaux</div>
           <div style={{ fontSize: '12px', color: '#666' }}>9:41</div>
         </div>
-        <input type="text" placeholder="Rechercher bars, cafés..." style={{ width: '100%', padding: '12px 16px', backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', borderRadius: '8px', color: '#1a1a1a', fontSize: '14px', boxSizing: 'border-box' }} />
+        <input 
+          type="text" 
+          placeholder="Rechercher bars, cafés..." 
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ width: '100%', padding: '12px 16px', backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', borderRadius: '8px', color: '#1a1a1a', fontSize: '14px', boxSizing: 'border-box' }} 
+        />
       </div>
 
       {/* CATEGORIES SCROLL HORIZONTAL */}
