@@ -279,8 +279,20 @@ export default function App() {
             ) : (
               filteredBars.map((bar) => {
                 const post = POSTS.find((p) => p.barId === bar.id)
+                // Sponsors: La Dame Jeanne (1), Thida (3), + quelques random (7, 15, 25)
+                const isSponsor = [1, 3, 7, 15, 25].includes(bar.id)
+                
                 return (
-                  <div key={bar.id} style={{ backgroundColor: '#ffffff', borderRadius: '12px', overflow: 'hidden', marginBottom: '16px', border: '1px solid #e0e0e0', transition: 'all 0.2s', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)' }}>
+                  <div key={bar.id} style={{ 
+                    backgroundColor: isSponsor ? '#fffcf0' : '#ffffff', 
+                    borderRadius: '12px', 
+                    overflow: 'hidden', 
+                    marginBottom: '16px', 
+                    border: isSponsor ? '3px solid #DAA520' : '1px solid #e0e0e0', 
+                    transition: 'all 0.2s', 
+                    boxShadow: isSponsor ? '0 4px 12px rgba(218, 165, 32, 0.2)' : '0 2px 8px rgba(0, 0, 0, 0.04)',
+                    position: 'relative'
+                  }}>
                     {/* HEADER CARD - Avatar cliquable séparément */}
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }} onClick={() => openPostDetail(bar.id)}>
                       {/* Avatar - cliquable pour profil */}
@@ -332,7 +344,7 @@ export default function App() {
 
                     {/* FOOTER */}
                     <div style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', position: 'relative' }}>
-                      <div style={{ fontSize: '12px', color: '#999', cursor: 'pointer', flex: 1 }} onClick={() => openPostDetail(bar.id)}>📍 Posté à l'instant</div>
+                      <div style={{ fontSize: '12px', color: '#999', cursor: 'pointer', flex: 1, marginLeft: isSponsor ? '32px' : '0' }} onClick={() => openPostDetail(bar.id)}>📍 Posté à l'instant</div>
                       <button onClick={() => {
                         toggleLike(bar.id)  // Simple, pas d'animation complexe
                       }} style={{ padding: '6px 12px', backgroundColor: 'transparent', color: likes[bar.id] ? '#FF6B35' : '#ccc', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', transition: 'color 0.2s', display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
@@ -342,6 +354,27 @@ export default function App() {
                         {likeCount[bar.id] || 0}
                       </button>
                     </div>
+
+                    {/* BADGE SPONSOR - En bas à gauche du cadre, collé à la bordure */}
+                    {isSponsor && (
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '0',
+                        left: '0',
+                        width: '36px',
+                        height: '36px',
+                        backgroundColor: '#DAA520',
+                        borderRadius: '0 6px 0 0',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '2px 2px 8px rgba(218, 165, 32, 0.4)',
+                        zIndex: 10,
+                        fontSize: '22px'
+                      }}>
+                        ⭐
+                      </div>
+                    )}
                   </div>
                 )
               })
