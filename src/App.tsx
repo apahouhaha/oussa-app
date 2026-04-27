@@ -6,6 +6,7 @@ import { CATEGORIES } from './data/categories'
 import { BARS } from './data/bars'
 import { POSTS } from './data/posts'
 import { COLORS } from './constants/styles'
+import { MapTab } from './components/MapTab'
 
 // Style global pour l'animation du coeur
 const heartAnimationStyle = `
@@ -77,6 +78,11 @@ export default function App() {
     })
     setLikeCount(likesCounts)
   }, [])
+
+  // Reset le scroll vers le haut quand on change d'onglet
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [activeTab])
 
   const handleLogin = () => {
     setUser({ email, id: 'test' })
@@ -314,6 +320,10 @@ export default function App() {
               })
             )}
           </div>
+        )}
+
+        {activeTab === 'map' && (
+          <MapTab selectedCategory={selectedCategory} selectedFilters={selectedFilters} />
         )}
 
         {activeTab === 'profile' && (
@@ -587,6 +597,9 @@ export default function App() {
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#ffffff', borderTop: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-around', zIndex: 100 }}>
         <button onClick={() => setActiveTab('home')} style={{ flex: 1, padding: '16px', textAlign: 'center', color: activeTab === 'home' ? '#FF6B35' : '#999', backgroundColor: 'transparent', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: '600', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', transition: 'color 0.2s' }}>
           <span style={{ fontSize: '20px' }}>🏠</span>Accueil
+        </button>
+        <button onClick={() => setActiveTab('map')} style={{ flex: 1, padding: '16px', textAlign: 'center', color: activeTab === 'map' ? '#FF6B35' : '#999', backgroundColor: 'transparent', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: '600', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', transition: 'color 0.2s' }}>
+          <span style={{ fontSize: '20px' }}>🗺️</span>Carte
         </button>
         <button onClick={() => setActiveTab('profile')} style={{ flex: 1, padding: '16px', textAlign: 'center', color: activeTab === 'profile' ? '#FF6B35' : '#999', backgroundColor: 'transparent', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: '600', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', transition: 'color 0.2s' }}>
           <span style={{ fontSize: '20px' }}>👤</span>Profil
