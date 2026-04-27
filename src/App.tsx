@@ -41,8 +41,6 @@ const heartAnimationStyle = `
     }
   }
 
-  
-
   .confetti {
     position: fixed;
     pointer-events: none;
@@ -91,29 +89,26 @@ export default function App() {
   }
 
   const toggleLike = (barId: number, clickX?: number, clickY?: number) => {
-  const newLiked = !likes[barId]
-  
-  setLikes((prev) => {
-    const newLikes = { ...prev }
-    newLikes[barId] = newLiked
-    return newLikes
-  })
-  
-  setLikeCount((prev) => {
-    const newCount = { ...prev }
-    newCount[barId] = (newCount[barId] || 0) + (newLiked ? 1 : -1)
-    localStorage.setItem(`bar_likes_${barId}`, String(newCount[barId]))
-    return newCount
-  })
+    const newLiked = !likes[barId]
 
-  // ===== ANIMATION COEUR SPECTACULAIRE =====
-  if (newLiked && clickX && clickY) {
-    createHearts(clickX, clickY)
+    setLikes((prev) => {
+      const newLikes = { ...prev }
+      newLikes[barId] = newLiked
+      return newLikes
+    })
+
+    setLikeCount((prev) => {
+      const newCount = { ...prev }
+      newCount[barId] = (newCount[barId] || 0) + (newLiked ? 1 : -1)
+      localStorage.setItem(`bar_likes_${barId}`, String(newCount[barId]))
+      return newCount
+    })
+
+    // ===== ANIMATION COEUR SPECTACULAIRE =====
+    if (newLiked && clickX && clickY) {
+      createHearts(clickX, clickY)
+    }
   }
-}
-
-
-
 
   const toggleBarLike = (barId: number) => {
     setBarLikes((prev) => {
@@ -166,7 +161,6 @@ export default function App() {
   }
 
   const completeOffer = () => {
-    // Afficher l'animation au lieu de l'alert
     setShowCelebration(true)
     setTimeout(() => {
       setShowCelebration(false)
@@ -298,34 +292,34 @@ export default function App() {
                     )}
 
                     {/* FOOTER */}
-<div style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-  <div style={{ fontSize: '12px', color: '#999', cursor: 'pointer', flex: 1 }} onClick={() => openPostDetail(bar.id)}>📍 Posté à l'instant</div>
-  <button onClick={(e) => {
-    const rect = (e.target as HTMLElement).getBoundingClientRect()
-    toggleLike(bar.id, rect.left + rect.width / 2, rect.top + rect.height / 2)
-  }} style={{ padding: '6px 12px', backgroundColor: 'transparent', color: likes[bar.id] ? '#FF6B35' : '#ccc', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', transition: 'all 0.3s', display: 'flex', alignItems: 'center', gap: '6px', position: 'relative' }}>
-    <span style={{ fontSize: '20px', display: 'inline-block', transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)', transform: likes[bar.id] ? 'scale(1.3) rotate(0deg)' : 'scale(1)', filter: likes[bar.id] ? 'drop-shadow(0 0 8px rgba(255, 107, 53, 0.6))' : 'none' }}>
-      {likes[bar.id] ? '❤️' : '🤍'}
-    </span>
-    {likeCount[bar.id] || 0}
-  </button>
-
-  {/* Coeurs flottants au like */}
-  {floatingHearts.map((heart, idx) => (
-    <div 
-      key={heart.id}
-      className={`heart-float heart-float-${(idx % 7) + 1}`}
-      style={{
-        left: `${heart.startX}px`,
-        top: `${heart.startY}px`,
-        fontSize: `${heart.size}px`,
-      }}
-    >
-      ❤️
-    </div>
-  ))}
-</div>
+                    <div style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', position: 'relative' }}>
+                      <div style={{ fontSize: '12px', color: '#999', cursor: 'pointer', flex: 1 }} onClick={() => openPostDetail(bar.id)}>📍 Posté à l'instant</div>
+                      <button onClick={(e) => {
+                        const rect = (e.target as HTMLElement).getBoundingClientRect()
+                        toggleLike(bar.id, rect.left + rect.width / 2, rect.top + rect.height / 2)
+                      }} style={{ padding: '6px 12px', backgroundColor: 'transparent', color: likes[bar.id] ? '#FF6B35' : '#ccc', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', transition: 'all 0.3s', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontSize: '20px', display: 'inline-block', transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)', transform: likes[bar.id] ? 'scale(1.3) rotate(0deg)' : 'scale(1)', filter: likes[bar.id] ? 'drop-shadow(0 0 8px rgba(255, 107, 53, 0.6))' : 'none' }}>
+                          {likes[bar.id] ? '❤️' : '🤍'}
+                        </span>
+                        {likeCount[bar.id] || 0}
                       </button>
+
+                      {/* Coeurs flottants au like */}
+                      {floatingHearts.map((heart, idx) => (
+                        <div 
+                          key={heart.id}
+                          className={`heart-float heart-float-${(idx % 7) + 1}`}
+                          style={{
+                            position: 'fixed',
+                            left: `${heart.startX}px`,
+                            top: `${heart.startY}px`,
+                            fontSize: `${heart.size}px`,
+                            pointerEvents: 'none',
+                          }}
+                        >
+                          ❤️
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )
@@ -385,7 +379,7 @@ export default function App() {
         </div>
       )}
 
-      {/* MODALES - Détail Post ÉPURÉ */}
+      {/* MODALES - Détail Post */}
       {selectedPost && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'flex-end', zIndex: 1000 }} onClick={closeModal}>
           <div style={{ backgroundColor: '#ffffff', borderRadius: '16px 16px 0 0', padding: '24px', maxWidth: '600px', width: '100%', maxHeight: '90vh', overflow: 'auto' }} onClick={(e) => e.stopPropagation()}>
@@ -398,27 +392,22 @@ export default function App() {
 
             {selectedPost.isSpecialOffer ? (
               <div>
-                {/* Titre offre - simple et épuré */}
                 <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#FF6B35', margin: '0 0 12px 0', lineHeight: '1.4' }}>
                   {selectedPost.offerTitle}
                 </h3>
 
-                {/* Sous-description - bien visible */}
                 <p style={{ fontSize: '14px', color: '#666', margin: '0 0 24px 0', lineHeight: '1.6', paddingBottom: '16px', borderBottom: '1px solid #e0e0e0' }}>
                   {selectedPost.offerSubDesc}
                 </p>
 
-                {/* Instructions - sympa et générique */}
                 <div style={{ backgroundColor: '#f9f9f9', padding: '16px', borderRadius: '8px', marginBottom: '24px', textAlign: 'center', fontSize: '13px', color: '#1a1a1a' }}>
                   <p style={{ margin: '0 0 8px 0', fontWeight: '500' }}>🎁 Demande le code à ton commerçant</p>
                   <p style={{ margin: 0, color: '#666' }}>pour profiter de l'offre!</p>
                 </div>
 
-                {/* Code input - Pavé numérique */}
                 <div style={{ marginBottom: '24px' }}>
                   <label style={{ fontSize: '12px', color: '#999', display: 'block', marginBottom: '12px', fontWeight: '500' }}>Code 🔐</label>
 
-                  {/* Affichage du code */}
                   <div style={{
                     width: '100%',
                     padding: '16px',
@@ -444,7 +433,6 @@ export default function App() {
                     ))}
                   </div>
 
-                  {/* Pavé numérique compact */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', marginBottom: '16px' }}>
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
                       <button
@@ -470,7 +458,6 @@ export default function App() {
                     ))}
                   </div>
 
-                  {/* Row 0 + Effacer */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', marginBottom: '16px' }}>
                     <button
                       onClick={() => codeInput.length < 4 && setCodeInput(codeInput + '0')}
@@ -515,7 +502,6 @@ export default function App() {
                     </button>
                   </div>
 
-                  {/* Messages - seulement après 4 chiffres */}
                   {codeInput.length === 4 && !isCodeCorrect && (
                     <p style={{ fontSize: '12px', color: '#ff4444', margin: '8px 0 0 0', textAlign: 'center' }}>❌ Code incorrect</p>
                   )}
@@ -524,7 +510,6 @@ export default function App() {
                   )}
                 </div>
 
-                {/* Bouton Valider - grisé si code incorrect */}
                 <button
                   onClick={completeOffer}
                   disabled={!isCodeCorrect}
@@ -557,10 +542,9 @@ export default function App() {
         </div>
       )}
 
-      {/* CELEBRATION ANIMATION - Confettis à la validation */}
+      {/* CELEBRATION ANIMATION */}
       {showCelebration && (
         <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 2000 }}>
-          {/* Confettis - 30 pièces */}
           {[...Array(30)].map((_, i) => (
             <div
               key={`confetti-${i}`}
@@ -577,7 +561,6 @@ export default function App() {
             />
           ))}
 
-          {/* Message de célébration */}
           <div style={{
             position: 'fixed',
             top: '50%',
@@ -611,6 +594,8 @@ export default function App() {
           }
         }
       `}</style>
+
+      {/* NAVIGATION BOTTOM */}
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#ffffff', borderTop: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-around', zIndex: 100 }}>
         <button onClick={() => setActiveTab('home')} style={{ flex: 1, padding: '16px', textAlign: 'center', color: activeTab === 'home' ? '#FF6B35' : '#999', backgroundColor: 'transparent', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: '600', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', transition: 'color 0.2s' }}>
           <span style={{ fontSize: '20px' }}>🏠</span>Accueil
