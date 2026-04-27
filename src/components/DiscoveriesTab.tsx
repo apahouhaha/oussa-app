@@ -47,6 +47,13 @@ export function DiscoveriesTab({ bars, onBarClick }: DiscoveriesTabProps) {
 
   return (
     <div style={{ maxWidth: '600px', margin: '0 auto', padding: '24px 16px', paddingBottom: '120px' }}>
+      {/* PHRASE D'ACCROCHE */}
+      <div style={{ marginBottom: '24px', padding: '16px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
+        <p style={{ fontSize: '14px', color: '#1a1a1a', margin: '0', lineHeight: '1.5', fontWeight: '500' }}>
+          ✨ Découvre des établissements dynamiques près de toi qui pourraient t'intéresser. Swipe pour explorer!
+        </p>
+      </div>
+
       {shuffledBars.map((bar) => (
         <div
           key={bar.id}
@@ -61,6 +68,41 @@ export function DiscoveriesTab({ bars, onBarClick }: DiscoveriesTabProps) {
           }}
           onClick={() => onBarClick(bar.id)}
         >
+          {/* HEADER AVEC AVATAR */}
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div
+              style={{
+                width: '48px',
+                height: '48px',
+                minWidth: '48px',
+                borderRadius: '50%',
+                backgroundColor: '#f5f5f5',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '24px',
+                overflow: 'hidden',
+              }}
+            >
+              {bar.profilePhoto ? (
+                <img
+                  src={bar.profilePhoto}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  alt={bar.name}
+                />
+              ) : (
+                bar.emoji
+              )}
+            </div>
+            <div>
+              <h3 style={{ fontSize: '14px', fontWeight: '700', color: '#1a1a1a', margin: '0' }}>
+                {bar.name}
+              </h3>
+              <p style={{ fontSize: '11px', color: '#999', margin: '2px 0 0 0' }}>
+                📍 {bar.location} • {bar.distance}km
+              </p>
+            </div>
+          </div>
           {/* GROSSE PHOTO */}
           <div
             style={{
@@ -126,14 +168,6 @@ export function DiscoveriesTab({ bars, onBarClick }: DiscoveriesTabProps) {
 
           {/* INFOS EN BAS */}
           <div style={{ padding: '16px' }}>
-            {/* Nom + Localisation */}
-            <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#FF6B35', margin: '0 0 4px 0' }}>
-              {bar.name}
-            </h3>
-            <p style={{ fontSize: '12px', color: '#999', margin: '0 0 12px 0' }}>
-              📍 {bar.location} • {bar.distance}km
-            </p>
-
             {/* Description détaillée */}
             <p style={{ fontSize: '13px', color: '#1a1a1a', margin: '0 0 12px 0', lineHeight: '1.5' }}>
               {bar.discoveryDescription}

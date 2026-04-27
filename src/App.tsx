@@ -240,49 +240,57 @@ export default function App() {
         />
       )}
 
-      {/* HEADER MINIMALISTE */}
-      <div style={{ padding: '16px 24px', borderBottom: '1px solid #e0e0e0' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-          <div style={{ fontSize: '12px', color: '#666' }}>📍 Mouvaux</div>
-          <div style={{ fontSize: '12px', color: '#666' }}>9:41</div>
+      {/* HEADER MINIMALISTE - Visible que sur les onglets home et map */}
+      {(activeTab === 'home' || activeTab === 'map') && (
+        <div style={{ padding: '16px 24px', borderBottom: '1px solid #e0e0e0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <div style={{ fontSize: '12px', color: '#666' }}>📍 Mouvaux</div>
+            <div style={{ fontSize: '12px', color: '#666' }}>9:41</div>
+          </div>
+          <input 
+            type="text" 
+            placeholder="Rechercher bars, cafés..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{ width: '100%', padding: '12px 16px', backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', borderRadius: '8px', color: '#1a1a1a', fontSize: '14px', boxSizing: 'border-box' }} 
+          />
         </div>
-        <input 
-          type="text" 
-          placeholder="Rechercher bars, cafés..." 
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ width: '100%', padding: '12px 16px', backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', borderRadius: '8px', color: '#1a1a1a', fontSize: '14px', boxSizing: 'border-box' }} 
-        />
-      </div>
+      )}
 
-      {/* CATEGORIES SCROLL HORIZONTAL */}
-      <div style={{ borderBottom: '1px solid #e0e0e0', overflowX: 'auto', padding: '12px 0', paddingLeft: '24px' }}>
-        <div style={{ display: 'flex', gap: '12px', minWidth: 'min-content' }}>
-          {CATEGORIES.map((cat) => (
-            <button key={cat.id} onClick={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', padding: '12px 16px', backgroundColor: selectedCategory === cat.id ? '#FF6B35' : '#f5f5f5', color: selectedCategory === cat.id ? 'white' : '#1a1a1a', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: '500', whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
-              <span style={{ fontSize: '20px' }}>{cat.emoji}</span>
-              {cat.label}
-            </button>
-          ))}
+      {/* CATEGORIES SCROLL HORIZONTAL - Visible que sur les onglets home et map */}
+      {(activeTab === 'home' || activeTab === 'map') && (
+        <div style={{ borderBottom: '1px solid #e0e0e0', overflowX: 'auto', padding: '12px 0', paddingLeft: '24px' }}>
+          <div style={{ display: 'flex', gap: '12px', minWidth: 'min-content' }}>
+            {CATEGORIES.map((cat) => (
+              <button key={cat.id} onClick={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', padding: '12px 16px', backgroundColor: selectedCategory === cat.id ? '#FF6B35' : '#f5f5f5', color: selectedCategory === cat.id ? 'white' : '#1a1a1a', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: '500', whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
+                <span style={{ fontSize: '20px' }}>{cat.emoji}</span>
+                {cat.label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* FILTRES SCROLL HORIZONTAL */}
-      <div style={{ borderBottom: '1px solid #e0e0e0', overflowX: 'auto', padding: '12px 0', paddingLeft: '24px' }}>
-        <div style={{ display: 'flex', gap: '8px', minWidth: 'min-content' }}>
-          {FILTERS.map((filter) => (
-            <button key={filter.id} onClick={() => toggleFilter(filter.id)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', backgroundColor: selectedFilters.includes(filter.id) ? '#FF6B35' : '#f5f5f5', color: selectedFilters.includes(filter.id) ? 'white' : '#666', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '500', whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
-              <span>{filter.emoji}</span>
-              {filter.label}
-            </button>
-          ))}
+      {/* FILTRES SCROLL HORIZONTAL - Visible que sur les onglets home et map */}
+      {(activeTab === 'home' || activeTab === 'map') && (
+        <div style={{ borderBottom: '1px solid #e0e0e0', overflowX: 'auto', padding: '12px 0', paddingLeft: '24px' }}>
+          <div style={{ display: 'flex', gap: '8px', minWidth: 'min-content' }}>
+            {FILTERS.map((filter) => (
+              <button key={filter.id} onClick={() => toggleFilter(filter.id)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', backgroundColor: selectedFilters.includes(filter.id) ? '#FF6B35' : '#f5f5f5', color: selectedFilters.includes(filter.id) ? 'white' : '#666', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '500', whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
+                <span>{filter.emoji}</span>
+                {filter.label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* COMPTEUR RÉSULTATS */}
-      <div style={{ padding: '12px 24px', backgroundColor: '#f9f9f9', borderBottom: '1px solid #e0e0e0', fontSize: '13px', color: '#666', fontWeight: '500' }}>
-        {filteredBars.length} résultat{filteredBars.length > 1 ? 's' : ''}
-      </div>
+      {/* COMPTEUR RÉSULTATS - Visible que sur les onglets home et map */}
+      {(activeTab === 'home' || activeTab === 'map') && (
+        <div style={{ padding: '12px 24px', backgroundColor: '#f9f9f9', borderBottom: '1px solid #e0e0e0', fontSize: '13px', color: '#666', fontWeight: '500' }}>
+          {filteredBars.length} résultat{filteredBars.length > 1 ? 's' : ''}
+        </div>
+      )}
 
       {/* CONTENU PRINCIPAL */}
       <div style={{ maxWidth: '600px', margin: '0 auto', padding: '24px 16px', paddingBottom: '120px' }}>
