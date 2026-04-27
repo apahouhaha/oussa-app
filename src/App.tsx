@@ -8,6 +8,7 @@ import { POSTS } from './data/posts'
 import { COLORS } from './constants/styles'
 import { MapTab } from './components/MapTab'
 import { SponsorshipBanner } from './components/SponsorshipBanner'
+import { DiscoveriesTab } from './components/DiscoveriesTab'
 
 // Style global pour l'animation du coeur
 const heartAnimationStyle = `
@@ -197,6 +198,21 @@ export default function App() {
     emoji: bar.emoji,
   }))
 
+  // Data pour l'onglet Découvertes (enrichi avec descriptions) - Les 4 établissements avec photos
+  const discoveryBars = BARS.filter(bar => [1, 2, 3, 21].includes(bar.id)).map(bar => ({
+    ...bar,
+    discoveryDescription:
+      bar.id === 1 ? 'Découvrez notre sélection de bières artisanales du monde entier. Un véritable paradis pour les amateurs de houblon et de saveurs authentiques.' :
+      bar.id === 2 ? 'Venez passer un moment convivial autour de jeux de société, de billard et d\'une bonne ambiance. Idéal entre amis ou en famille!' :
+      bar.id === 3 ? 'Plongez dans l\'univers magique de la cuisine asiatique authentique. Des saveurs exotiques qui vous transporteront en Asie.' :
+      'Dansez jusqu\'à l\'aube avec les meilleurs DJs. Une ambiance électrique et des beats entraînants vous attendent!',
+    discoveryText:
+      bar.id === 1 ? '20% de réduction sur votre première visite!' :
+      bar.id === 2 ? 'Soirée jeux tous les vendredis - Apéro offert!' :
+      bar.id === 3 ? 'Menu découverte à 29€ - À tester absolument!' :
+      'Happy hour 18h-20h tous les jours',
+  }))
+
   if (!user) {
     return (
       <div style={{ minHeight: '100vh', backgroundColor: '#ffffff', color: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -384,6 +400,16 @@ export default function App() {
 
         {activeTab === 'map' && (
           <MapTab selectedCategory={selectedCategory} selectedFilters={selectedFilters} />
+        )}
+
+        {activeTab === 'discoveries' && (
+          <DiscoveriesTab 
+            bars={discoveryBars}
+            onBarClick={(barId) => {
+              const bar = BARS.find(b => b.id === barId)
+              if (bar) openBarProfile(bar)
+            }}
+          />
         )}
 
         {activeTab === 'profile' && (
@@ -660,6 +686,9 @@ export default function App() {
         </button>
         <button onClick={() => setActiveTab('map')} style={{ flex: 1, padding: '16px', textAlign: 'center', color: activeTab === 'map' ? '#FF6B35' : '#999', backgroundColor: 'transparent', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: '600', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', transition: 'color 0.2s' }}>
           <span style={{ fontSize: '20px' }}>🗺️</span>Carte
+        </button>
+        <button onClick={() => setActiveTab('discoveries')} style={{ flex: 1, padding: '16px', textAlign: 'center', color: activeTab === 'discoveries' ? '#FF6B35' : '#999', backgroundColor: 'transparent', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: '600', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', transition: 'color 0.2s' }}>
+          <span style={{ fontSize: '20px' }}>✨</span>Découvertes
         </button>
         <button onClick={() => setActiveTab('profile')} style={{ flex: 1, padding: '16px', textAlign: 'center', color: activeTab === 'profile' ? '#FF6B35' : '#999', backgroundColor: 'transparent', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: '600', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', transition: 'color 0.2s' }}>
           <span style={{ fontSize: '20px' }}>👤</span>Profil
