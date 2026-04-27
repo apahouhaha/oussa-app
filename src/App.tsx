@@ -6,8 +6,6 @@ import { CATEGORIES } from './data/categories'
 import { BARS } from './data/bars'
 import { POSTS } from './data/posts'
 import { COLORS } from './constants/styles'
-import { useHeartAnimation } from './hooks/useHeartAnimation'
-import { HEART_ANIMATIONS_CSS } from './constants/heartAnimations'
 
 // Style global pour l'animation du coeur
 const heartAnimationStyle = `
@@ -71,7 +69,6 @@ export default function App() {
   const [barLikes, setBarLikes] = useState<{ [key: number]: boolean }>({})
   const [barLikeCount, setBarLikeCount] = useState<{ [key: number]: number }>({})
   const [showCelebration, setShowCelebration] = useState(false)
-  const { floatingHearts, createHearts } = useHeartAnimation()
 
   useEffect(() => {
     const likesCounts: { [key: number]: number } = {}
@@ -89,7 +86,7 @@ export default function App() {
     setUser(null)
   }
 
-  const toggleLike = (barId: number, clickX?: number, clickY?: number) => {
+  const toggleLike = (barId: number) => {
     const newLiked = !likes[barId]
 
     setLikes((prev) => {
@@ -104,11 +101,6 @@ export default function App() {
       localStorage.setItem(`bar_likes_${barId}`, String(newCount[barId]))
       return newCount
     })
-
-    // ===== ANIMATION COEUR SPECTACULAIRE =====
-    if (newLiked && clickX && clickY) {
-      createHearts(clickX, clickY)
-    }
   }
 
   const toggleBarLike = (barId: number) => {
@@ -308,32 +300,14 @@ export default function App() {
                     {/* FOOTER */}
                     <div style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', position: 'relative' }}>
                       <div style={{ fontSize: '12px', color: '#999', cursor: 'pointer', flex: 1 }} onClick={() => openPostDetail(bar.id)}>📍 Posté à l'instant</div>
-                      <button onClick={(e) => {
-                        const rect = (e.target as HTMLElement).getBoundingClientRect()
-                        toggleLike(bar.id, rect.left + rect.width / 2, rect.top + rect.height / 2)
-                      }} style={{ padding: '6px 12px', backgroundColor: 'transparent', color: likes[bar.id] ? '#FF6B35' : '#ccc', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', transition: 'all 0.3s', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ fontSize: '20px', display: 'inline-block', transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)', transform: likes[bar.id] ? 'scale(1.3) rotate(0deg)' : 'scale(1)', filter: likes[bar.id] ? 'drop-shadow(0 0 8px rgba(255, 107, 53, 0.6))' : 'none' }}>
+                      <button onClick={() => {
+                        toggleLike(bar.id)  // Simple, pas d'animation complexe
+                      }} style={{ padding: '6px 12px', backgroundColor: 'transparent', color: likes[bar.id] ? '#FF6B35' : '#ccc', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', transition: 'color 0.2s', display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                        <span style={{ fontSize: '20px', display: 'inline-block', transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)', transform: likes[bar.id] ? 'scale(1.2)' : 'scale(1)' }}>
                           {likes[bar.id] ? '❤️' : '🤍'}
                         </span>
                         {likeCount[bar.id] || 0}
                       </button>
-
-                      {/* Coeurs flottants au like */}
-                      {floatingHearts.map((heart, idx) => (
-                        <div 
-                          key={heart.id}
-                          className={`heart-float heart-float-${(idx % 7) + 1}`}
-                          style={{
-                            position: 'fixed',
-                            left: `${heart.startX}px`,
-                            top: `${heart.startY}px`,
-                            fontSize: `${heart.size}px`,
-                            pointerEvents: 'none',
-                          }}
-                        >
-                          ❤️
-                        </div>
-                      ))}
                     </div>
                   </div>
                 )
