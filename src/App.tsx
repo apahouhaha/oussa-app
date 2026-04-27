@@ -7,6 +7,7 @@ import { BARS } from './data/bars'
 import { POSTS } from './data/posts'
 import { COLORS } from './constants/styles'
 import { MapTab } from './components/MapTab'
+import { SponsorshipBanner } from './components/SponsorshipBanner'
 
 // Style global pour l'animation du coeur
 const heartAnimationStyle = `
@@ -181,6 +182,21 @@ export default function App() {
 
   const isCodeCorrect = codeInput.length === 4 && codeInput === selectedPost?.specialOfferCode
 
+  // Sponsors pour la bannière dorée
+  const sponsorBars = BARS.filter(bar => [1, 2, 21, 3].includes(bar.id)).map(bar => ({
+    id: bar.id,
+    name: bar.name,
+    sponsorMessage: 
+      bar.id === 1 ? 'Craft Beer Shop' :
+      bar.id === 2 ? 'Jeux & Convivialité' :
+      bar.id === 21 ? 'Dance & Music' :
+      'Cuisine Asiatique',
+    location: bar.location,
+    distance: bar.distance,
+    profilePhoto: bar.profilePhoto,
+    emoji: bar.emoji,
+  }))
+
   if (!user) {
     return (
       <div style={{ minHeight: '100vh', backgroundColor: '#ffffff', color: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -197,6 +213,17 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#ffffff', color: '#1a1a1a' }}>
+      {/* SPONSORSHIP BANNER */}
+      {activeTab === 'home' && (
+        <SponsorshipBanner 
+          sponsors={sponsorBars}
+          onBarClick={(barId) => {
+            const bar = BARS.find(b => b.id === barId)
+            if (bar) openBarProfile(bar)
+          }}
+        />
+      )}
+
       {/* HEADER MINIMALISTE */}
       <div style={{ padding: '16px 24px', borderBottom: '1px solid #e0e0e0' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
@@ -355,11 +382,11 @@ export default function App() {
               <p style={{ fontSize: '12px', color: '#999', margin: '0 0 8px 0' }}>📍 Localisation</p>
               <p style={{ fontSize: '13px', margin: '0 0 16px 0' }}>{selectedBar.location} • {selectedBar.distance}km</p>
 
-              <p style={{ fontSize: '12px', color: '#999', margin: '0 0 8px 0' }}>📞 Téléphone</p>
-              <p style={{ fontSize: '13px', margin: '0 0 16px 0' }}>{selectedBar.phone}</p>
+              <p style={{ fontSize: '12px', color: '#999', margin: '0 0 4px 0' }}>📞 Téléphone</p>
+              <a href={`tel:${selectedBar.phone}`} style={{ display: 'block', fontSize: '13px', margin: '0 0 16px 0', color: '#FF6B35', textDecoration: 'none', fontWeight: '600', cursor: 'pointer' }}>{selectedBar.phone}</a>
 
-              <p style={{ fontSize: '12px', color: '#999', margin: '0 0 8px 0' }}>📧 Email</p>
-              <p style={{ fontSize: '13px', margin: '0 0 16px 0' }}>{selectedBar.email}</p>
+              <p style={{ fontSize: '12px', color: '#999', margin: '0 0 4px 0' }}>📧 Email</p>
+              <a href={`mailto:${selectedBar.email}`} style={{ display: 'block', fontSize: '13px', margin: '0 0 16px 0', color: '#FF6B35', textDecoration: 'none', fontWeight: '600', cursor: 'pointer' }}>{selectedBar.email}</a>
 
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <a href={selectedBar.website} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#FF6B35', color: 'white', padding: '6px 12px', borderRadius: '6px', textDecoration: 'none', fontSize: '11px', fontWeight: '600' }}>Site Web</a>

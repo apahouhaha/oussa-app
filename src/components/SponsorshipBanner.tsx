@@ -1,134 +1,132 @@
 import { useState, useEffect, useRef } from 'react'
-import { BARS, isSponsashipActive } from '../data/bars'
-import { COLORS } from '../constants/styles'
 
-export function SponsorshipBanner({ onSelectBar }: { onSelectBar?: (bar: any) => void }) {
+interface SponsorBar {
+  id: number
+  name: string
+  sponsorMessage: string
+  location: string
+  distance: number
+  profilePhoto: string | null
+  emoji: string
+}
+
+interface SponsorshipBannerProps {
+  sponsors: SponsorBar[]
+  onBarClick: (barId: number) => void
+}
+
+export function SponsorshipBanner({ sponsors, onBarClick }: SponsorshipBannerProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [isDragging, setIsDragging] = useState(false)
-  const [startX, setStartX] = useState(0)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const touchStartX = useRef(0)
+  const touchEndX = useRef(0)
 
-  // Récupère seulement les bars avec sponsorship tier 40+ (bannière déroulante)
-  const sponsoredBars = BARS.filter(
-    bar => (bar.sponsorshipTier === 40 || bar.sponsorshipTier === 50) && isSponsashipActive(bar.sponsorshipEndDate)
-  )
+  if (sponsors.length === 0) return null
 
+  const currentSponsor = sponsors[currentIndex]
+
+  // Auto-scroll toutes les 8 secondes
   useEffect(() => {
-    if (sponsoredBars.length === 0) return
-
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % sponsoredBars.length)
-    }, 5000) // Change toutes les 5s
-
+      setCurrentIndex((prev) => (prev + 1) % sponsors.length)
+    }, 8000)
     return () => clearInterval(interval)
-  }, [sponsoredBars.length])
+  }, [sponsors.length])
 
-  // Swipe/Drag handler
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true)
-    setStartX(e.clientX)
-  }
-
-  const handleMouseUp = (e: React.MouseEvent) => {
-    if (!isDragging) return
-    setIsDragging(false)
-    
-    const diff = startX - e.clientX
-    if (Math.abs(diff) > 50) { // Minimum 50px pour compter comme swipe
-      if (diff > 0) {
-        // Swipe vers la gauche = bar suivant
-        setCurrentIndex((prev) => (prev + 1) % sponsoredBars.length)
-      } else {
-        // Swipe vers la droite = bar précédent
-        setCurrentIndex((prev) => (prev - 1 + sponsoredBars.length) % sponsoredBars.length)
-      }
-    }
-  }
-
+  // Gestion du swipe
   const handleTouchStart = (e: React.TouchEvent) => {
-    setIsDragging(true)
-    setStartX(e.touches[0].clientX)
+    touchStartX.current = e.clientX || e.touches[0].clientX
   }
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    if (!isDragging) return
-    setIsDragging(false)
-    
-    const diff = startX - e.changedTouches[0].clientX
-    if (Math.abs(diff) > 50) {
-      if (diff > 0) {
-        setCurrentIndex((prev) => (prev + 1) % sponsoredBars.length)
-      } else {
-        setCurrentIndex((prev) => (prev - 1 + sponsoredBars.length) % sponsoredBars.length)
-      }
+    touchEndX.current = e.clientX || e.changedTouches[0].clientX
+    handleSwipe()
+  }
+
+  const handleSwipe = () => {
+    const distance = touchStartX.current - touchEndX.current
+    const isLeftSwipe = distance > 50
+    const isRightSwipe = distance < -50
+
+    if (isLeftSwipe) {
+      // Swipe gauche → bar suivant
+      setCurrentIndex((prev) => (prev + 1) % sponsors.length)
+    } else if (isRightSwipe) {
+      // Swipe droite → bar précédent
+      setCurrentIndex((prev) => (prev - 1 + sponsors.length) % sponsors.length)
     }
   }
 
-  if (sponsoredBars.length === 0) return null
-
-  const bar = sponsoredBars[currentIndex]
-
   return (
     <div
-      ref={containerRef}
-      style={{
-        backgroundColor: COLORS.accent,
-        padding: '12px 16px',
-        borderBottom: '3px solid ' + COLORS.primary,
-        cursor: isDragging ? 'grabbing' : 'grab',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '14px',
-        transition: isDragging ? 'none' : 'all 0.3s ease',
-        userSelect: 'none',
-        minHeight: '120px',
-      }}
-      onClick={() => {
-        if (onSelectBar && !isDragging) onSelectBar(bar)
-      }}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={() => setIsDragging(false)}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
+      style={{
+        height: '100px',
+        backgroundColor: '#DAA520',
+        padding: '12px 16px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        cursor: 'pointer',
+        userSelect: 'none',
+        overflow: 'hidden',
+      }}
+      onClick={() => onBarClick(currentSponsor.id)}
     >
-      {/* Logo/Avatar du bar */}
+      {/* Avatar */}
       <div
         style={{
-          width: '80px',
-          height: '80px',
+          width: '76px',
+          height: '76px',
+          minWidth: '76px',
           borderRadius: '50%',
-          backgroundColor: '#ffffff',
+          backgroundColor: '#f5f5f5',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '40px',
+          fontSize: '32px',
           overflow: 'hidden',
-          flexShrink: 0,
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-          border: '3px solid ' + COLORS.primary,
+          border: '3px solid white',
         }}
       >
-        {bar.profilePhoto ? (
-          <img src={bar.profilePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        {currentSponsor.profilePhoto ? (
+          <img
+            src={currentSponsor.profilePhoto}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            alt={currentSponsor.name}
+          />
         ) : (
-          bar.emoji
+          currentSponsor.emoji
         )}
       </div>
 
-      {/* Infos texte - TEXTE TRÈS AGRANDI */}
-      <div style={{ flex: 1, textAlign: 'left', minWidth: '220px' }}>
-        <div style={{ fontSize: '18px', fontWeight: '700', color: '#1a1a1a', marginBottom: '3px', lineHeight: '1.2' }}>
-          ✨ {bar.name}
+      {/* Infos */}
+      <div style={{ flex: 1, overflow: 'hidden' }}>
+        <h3 style={{ fontSize: '14px', fontWeight: '700', color: '#1a1a1a', margin: '0 0 4px 0' }}>
+          {currentSponsor.name}
+        </h3>
+        <p style={{ fontSize: '12px', color: '#333', margin: '0 0 6px 0', fontWeight: '500' }}>
+          {currentSponsor.sponsorMessage}
+        </p>
+        <div style={{ fontSize: '11px', color: '#555' }}>
+          📍 {currentSponsor.location} • {currentSponsor.distance}km
         </div>
-        {bar.tagline && (
-          <div style={{ fontSize: '16px', color: '#1a1a1a', fontWeight: '500', marginBottom: '4px', lineHeight: '1.3' }}>
-            {bar.tagline}
-          </div>
-        )}
-        <div style={{ fontSize: '13px', color: '#333', lineHeight: '1.2' }}>
-          📍 {bar.distance}km • {bar.location}
-        </div>
+      </div>
+
+      {/* Indicateur de progression */}
+      <div style={{ display: 'flex', gap: '4px', minWidth: '50px' }}>
+        {sponsors.map((_, i) => (
+          <div
+            key={i}
+            style={{
+              width: '6px',
+              height: '6px',
+              borderRadius: '50%',
+              backgroundColor: i === currentIndex ? '#ffffff' : 'rgba(255, 255, 255, 0.5)',
+              transition: 'all 0.3s',
+            }}
+          />
+        ))}
       </div>
     </div>
   )
