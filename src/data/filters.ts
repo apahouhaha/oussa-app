@@ -1,22 +1,17 @@
-export type Filter = {
+export interface Filter {
   id: string
   emoji: string
   label: string
 }
 
 export const FILTERS: Filter[] = [
-  { id: 'offers', emoji: '🎁', label: 'Offres spéciales' },
   { id: 'open', emoji: '⏰', label: 'Ouvert' },
   { id: 'nearby', emoji: '📍', label: '< 500m' },
-  { id: 'terrasse', emoji: '☀️', label: 'Terrasse' },
+  { id: 'terrasse', emoji: '☂️', label: 'Terrasse' },
   { id: 'wifi', emoji: '📶', label: 'WiFi' },
   { id: 'parking', emoji: '🅿️', label: 'Parking' },
   { id: 'metro', emoji: '🚇', label: 'Métro-Tram' },
   { id: 'takeaway', emoji: '🚚', label: 'À emporter' },
-  { id: 'happyhour', emoji: '🍹', label: 'Happy Hour' },
   { id: 'pets', emoji: '🐕', label: 'Pet friendly' },
   { id: 'games', emoji: '🎲', label: 'Jeux' },
-  { id: 'concerts', emoji: '🎵', label: 'Concerts' },
 ]
-
-// IMPORTANT: Filter "Offres spéciales" cherche dans POSTS.isSpecialOffer, pas dans bar.filters!
