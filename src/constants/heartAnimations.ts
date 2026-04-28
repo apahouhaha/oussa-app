@@ -1,31 +1,23 @@
-// Animation CSS pour les cœurs flottants spectaculaires
+// Animation CSS pour les cœurs flottants
 export const HEART_ANIMATIONS_CSS = `
   @keyframes floatHearts {
     0% {
       opacity: 1;
       transform: translateY(0) scale(1);
-      filter: drop-shadow(0 0 15px rgba(255, 107, 53, 1));
-    }
-    50% {
-      opacity: 1;
-      filter: drop-shadow(0 0 30px rgba(255, 107, 53, 1));
     }
     100% {
       opacity: 0;
-      transform: translateY(-150vh) scale(0.3);
-      filter: drop-shadow(0 0 5px rgba(255, 107, 53, 0));
+      transform: translateY(-150px) scale(0.4);
     }
   }
 
   .heart-float {
     position: fixed;
-    font-size: 48px;
-    font-weight: bold;
+    font-size: 20px;
     z-index: 9999;
     pointer-events: none;
     user-select: none;
-    animation: floatHearts 2.5s ease-out forwards;
-    color: #FF6B35;
+    animation: floatHearts 1.8s ease-out forwards;
   }
 
   .heart-float-1 {

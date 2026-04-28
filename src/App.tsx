@@ -7,7 +7,6 @@ import { COLORS } from './constants/styles'
 import { MapTab } from './components/MapTab'
 import { SponsorshipBanner } from './components/SponsorshipBanner'
 import { DiscoveriesTab } from './components/DiscoveriesTab'
-import { FloatingButtons } from './components/FloatingButtons'
 import { useFiltering } from './hooks/useFiltering'
 
 // Style global pour animations
@@ -57,14 +56,95 @@ if (typeof document !== 'undefined') {
   document.head.appendChild(style)
 }
 
+// Composant Card réutilisable pour NOW et EXPLORE
+function BarCard({ bar, post, likes, likeCount, onLike, onBarClick, onPostClick, hasPhoto = true }: any) {
+  return (
+    <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', overflow: 'hidden', marginBottom: '16px', border: '1px solid #e0e0e0', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)' }}>
+      {/* CARD HEADER */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer' }} onClick={onPostClick}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, cursor: 'pointer' }} onClick={(e) => { e.stopPropagation(); onBarClick(bar); }}>
+          <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', overflow: 'hidden' }}>
+            {bar.profilePhoto ? <img src={bar.profilePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : bar.emoji}
+          </div>
+          <div>
+            <div style={{ fontWeight: '600', fontSize: '14px' }}>{bar.name}</div>
+            <div style={{ fontSize: '12px', color: '#999' }}>📍 {bar.distance}km • {bar.location}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* REAL-TIME STATUS */}
+      {(bar.currentStatus.terrasseDispo || bar.currentStatus.offreActive || bar.currentStatus.eventActive || bar.currentStatus.happyHourActive) && (
+        <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>
+          {bar.currentStatus.terrasseDispo && (
+            <div style={{ fontSize: '13px', color: '#4CAF50', fontWeight: '600', marginBottom: bar.currentStatus.offreActive || bar.currentStatus.eventActive || bar.currentStatus.happyHourActive ? '6px' : '0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }} onClick={onPostClick}>
+              <span className="blink-dot" style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#4CAF50' }}></span>
+              PLACES LIBRES EN TERRASSE
+            </div>
+          )}
+          {bar.currentStatus.offreActive && (
+            <div style={{ fontSize: '12px', color: COLORS.accent, fontWeight: '600', marginBottom: bar.currentStatus.eventActive || bar.currentStatus.happyHourActive ? '6px' : '0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }} onClick={onPostClick}>
+              🎁 +1 OFFRE SPÉCIALE EN COURS
+              <span style={{ fontSize: '10px' }}>→</span>
+            </div>
+          )}
+          {bar.currentStatus.eventActive && (
+            <div style={{ fontSize: '12px', color: '#9C27B0', fontWeight: '600', marginBottom: bar.currentStatus.happyHourActive ? '6px' : '0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }} onClick={onPostClick}>
+              🎪 +1 ÉVÉNEMENT À VENIR
+              <span style={{ fontSize: '10px' }}>→</span>
+            </div>
+          )}
+          {bar.currentStatus.happyHourActive && (
+            <div style={{ fontSize: '12px', color: '#4CAF50', fontWeight: '600', cursor: 'pointer' }} onClick={onPostClick}>
+              ⏰ HAPPY HOUR EN COURS
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* FILTERS - Seulement sur EXPLORE */}
+      {!hasPhoto && bar.filters && (
+        <div style={{ padding: '12px 16px', display: 'flex', gap: '8px', flexWrap: 'wrap', borderBottom: '1px solid #f0f0f0', cursor: 'pointer' }} onClick={onPostClick}>
+          {bar.filters.map((f: string) => {
+            const filter = FILTERS.find((opt) => opt.id === f)
+            return filter ? <div key={f} style={{ backgroundColor: '#f0f0f0', color: '#666', padding: '4px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '4px' }}><span>{filter.emoji}</span>{filter.label}</div> : null
+          })}
+        </div>
+      )}
+
+      {/* PHOTO - Affiche uniquement si présente */}
+      {bar.postPhoto && (
+        <div style={{ width: '100%', height: '240px', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden' }} onClick={onPostClick}>
+          <img src={bar.postPhoto} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        </div>
+      )}
+
+      {/* DESCRIPTION */}
+      <div style={{ padding: '12px 16px', fontSize: '13px', color: '#1a1a1a', borderBottom: '1px solid #f0f0f0', cursor: 'pointer' }} onClick={onPostClick}>
+        {post?.description}
+      </div>
+
+      {/* FOOTER */}
+      <div style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ fontSize: '12px', color: '#999' }}>📍 À l'instant</div>
+        <button onClick={() => onLike(bar.id)} style={{ padding: '6px 12px', backgroundColor: 'transparent', color: likes[bar.id] ? COLORS.primary : '#ccc', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ fontSize: '20px', transform: likes[bar.id] ? 'scale(1.3)' : 'scale(1)' }}>{likes[bar.id] ? '❤️' : '🤍'}</span>
+          {likeCount[bar.id] || 0}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function App() {
   const [user, setUser] = useState<any>(null)
   const [email, setEmail] = useState('test@example.com')
-  const [activeTab, setActiveTab] = useState('home')
+  const [activeTab, setActiveTab] = useState('now')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedFilters, setSelectedFilters] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [activeFloatingFilter, setActiveFloatingFilter] = useState<string | null>(null)
+  const [exploreViewMode, setExploreViewMode] = useState<'list' | 'map'>('list')
   const [likes, setLikes] = useState<{ [key: number]: boolean }>({})
   const [likeCount, setLikeCount] = useState<{ [key: number]: number }>({})
   const [selectedBar, setSelectedBar] = useState<any>(null)
@@ -83,6 +163,38 @@ export default function App() {
     selectedFilters,
     activeFloatingFilter,
   })
+
+  // Filtrer les bars avec statut temps réel pour NOW
+  let barsWithRealTimeStatus = BARS.filter(b => 
+    b.currentStatus.terrasseDispo || 
+    b.currentStatus.offreActive || 
+    b.currentStatus.eventActive || 
+    b.currentStatus.happyHourActive
+  )
+
+  // Appliquer le filtre flottant sélectionné
+  if (activeFloatingFilter) {
+    barsWithRealTimeStatus = barsWithRealTimeStatus.filter(b => {
+      if (activeFloatingFilter === 'terrasse') return b.currentStatus.terrasseDispo
+      if (activeFloatingFilter === 'offre') return b.currentStatus.offreActive
+      if (activeFloatingFilter === 'event') return b.currentStatus.eventActive
+      if (activeFloatingFilter === 'happyHour') return b.currentStatus.happyHourActive
+      return true
+    })
+  }
+
+  // Tri: terrasse dispo en priorité, puis par distance
+  barsWithRealTimeStatus = barsWithRealTimeStatus.sort((a, b) => {
+    const aTerrasse = a.currentStatus.terrasseDispo ? 0 : 1
+    const bTerrasse = b.currentStatus.terrasseDispo ? 0 : 1
+    if (aTerrasse !== bTerrasse) return aTerrasse - bTerrasse
+    return a.distance - b.distance
+  })
+
+  // Top bars pour empty state (par likes)
+  const topBarsByLikes = [...BARS].sort((a, b) => 
+    (likeCount[b.id] || 0) - (likeCount[a.id] || 0)
+  ).slice(0, 6)
 
   useEffect(() => {
     const likesCounts: { [key: number]: number } = {}
@@ -135,10 +247,6 @@ export default function App() {
     )
   }
 
-  const toggleFloatingFilter = (filter: string | null) => {
-    setActiveFloatingFilter(filter)
-  }
-
   const openBarProfile = (bar: any) => {
     setSelectedBar(bar)
   }
@@ -185,31 +293,62 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#ffffff', color: '#1a1a1a' }}>
-      {/* FLOATING BUTTONS */}
-      {activeTab === 'home' && (
-        <FloatingButtons 
-          counts={floatingButtonCounts}
-          activeFilter={activeFloatingFilter}
-          onFilterToggle={toggleFloatingFilter}
+      {/* SPONSORSHIP BANNER - Uniquement sur NOW */}
+      {activeTab === 'now' && (
+        <SponsorshipBanner 
+          sponsors={BARS.filter(b => [1, 2, 21, 3].includes(b.id))} 
+          onBarClick={(barId) => openBarProfile(BARS.find(b => b.id === barId)!)}
         />
       )}
 
-      {/* SPONSORSHIP BANNER */}
-      {activeTab === 'home' && <SponsorshipBanner sponsors={BARS.filter(b => [1, 2, 21, 3].includes(b.id))} onBarClick={(barId) => openBarProfile(BARS.find(b => b.id === barId)!)} />}
-
-      {/* HEADER */}
-      <div style={{ padding: '16px 24px', borderBottom: '1px solid #e0e0e0' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-          <div style={{ fontSize: '12px', color: '#666' }}>📍 Mouvaux</div>
-          <div style={{ fontSize: '12px', color: '#666' }}>9:41</div>
+      {/* FLOATING BUTTONS - Pastilles rondes NOW tab */}
+      {activeTab === 'now' && (
+        <div style={{ padding: '12px 24px', borderBottom: '1px solid #e0e0e0', overflowX: 'auto' }}>
+          <div style={{ display: 'flex', gap: '8px', minWidth: 'min-content', justifyContent: 'center' }}>
+            {[
+              { id: 'terrasse', emoji: '🏖️', color: '#FF6B35' },
+              { id: 'offre', emoji: '🎁', color: '#DAA520' },
+              { id: 'event', emoji: '🎪', color: '#9C27B0' },
+              { id: 'happyHour', emoji: '⏰', color: '#4CAF50' }
+            ].map(btn => (
+              <button
+                key={btn.id}
+                onClick={() => setActiveFloatingFilter(activeFloatingFilter === btn.id ? null : btn.id)}
+                style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '50%',
+                  backgroundColor: activeFloatingFilter === btn.id ? btn.color : '#ffffff',
+                  border: `3px solid ${activeFloatingFilter === btn.id ? btn.color : '#e0e0e0'}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  fontSize: '20px',
+                  transition: 'all 0.3s',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+                }}
+              >
+                {btn.emoji}
+              </button>
+            ))}
+          </div>
         </div>
-        {(activeTab === 'home' || activeTab === 'map') && (
-          <input type="text" placeholder="Rechercher bars, cafés..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} style={{ width: '100%', padding: '12px 16px', backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', borderRadius: '8px', color: '#1a1a1a', fontSize: '14px', boxSizing: 'border-box' }} />
-        )}
-      </div>
+      )}
 
-      {/* CATEGORIES */}
-      {(activeTab === 'home' || activeTab === 'map') && (
+      {/* HEADER - Visible sur EXPLORE */}
+      {activeTab === 'explore' && (
+        <div style={{ padding: '16px 24px', borderBottom: '1px solid #e0e0e0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <div style={{ fontSize: '12px', color: '#666' }}>📍 Mouvaux</div>
+            <div style={{ fontSize: '12px', color: '#666' }}>9:41</div>
+          </div>
+          <input type="text" placeholder="Rechercher bars, cafés..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} style={{ width: '100%', padding: '12px 16px', backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', borderRadius: '8px', color: '#1a1a1a', fontSize: '14px', boxSizing: 'border-box' }} />
+        </div>
+      )}
+
+      {/* CATEGORIES - Seulement sur EXPLORE */}
+      {activeTab === 'explore' && (
         <div style={{ borderBottom: '1px solid #e0e0e0', overflowX: 'auto', padding: '12px 0', paddingLeft: '24px' }}>
           <div style={{ display: 'flex', gap: '12px', minWidth: 'min-content' }}>
             {CATEGORIES.map((cat) => (
@@ -222,8 +361,8 @@ export default function App() {
         </div>
       )}
 
-      {/* FILTERS */}
-      {(activeTab === 'home' || activeTab === 'map') && (
+      {/* FILTERS - Seulement sur EXPLORE */}
+      {activeTab === 'explore' && (
         <div style={{ borderBottom: '1px solid #e0e0e0', overflowX: 'auto', padding: '12px 0', paddingLeft: '24px' }}>
           <div style={{ display: 'flex', gap: '8px', minWidth: 'min-content' }}>
             {FILTERS.map((filter) => (
@@ -236,98 +375,187 @@ export default function App() {
         </div>
       )}
 
-      {/* RESULTS COUNT */}
-      {(activeTab === 'home' || activeTab === 'map') && (
-        <div style={{ padding: '12px 24px', backgroundColor: '#f9f9f9', borderBottom: '1px solid #e0e0e0', fontSize: '13px', color: '#666', fontWeight: '500' }}>
-          {filteredBars.length} résultat{filteredBars.length > 1 ? 's' : ''}
+      {/* RESULTS COUNT + VIEW MODE TOGGLE */}
+      {activeTab === 'explore' && (
+        <div style={{ padding: '12px 24px', backgroundColor: '#f9f9f9', borderBottom: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ fontSize: '13px', color: '#666', fontWeight: '500' }}>
+            {filteredBars.length} résultat{filteredBars.length > 1 ? 's' : ''}
+          </div>
+          <div style={{ display: 'flex', gap: '6px', backgroundColor: '#e0e0e0', padding: '4px', borderRadius: '6px' }}>
+            <button
+              onClick={() => setExploreViewMode('list')}
+              style={{
+                padding: '6px 12px',
+                backgroundColor: exploreViewMode === 'list' ? '#ffffff' : 'transparent',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '12px',
+                fontWeight: '600',
+                color: exploreViewMode === 'list' ? '#1a1a1a' : '#666',
+                transition: 'all 0.2s'
+              }}
+            >
+              📋 Liste
+            </button>
+            <button
+              onClick={() => setExploreViewMode('map')}
+              style={{
+                padding: '6px 12px',
+                backgroundColor: exploreViewMode === 'map' ? '#ffffff' : 'transparent',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '12px',
+                fontWeight: '600',
+                color: exploreViewMode === 'map' ? '#1a1a1a' : '#666',
+                transition: 'all 0.2s'
+              }}
+            >
+              🗺️ Carte
+            </button>
+          </div>
         </div>
       )}
 
       {/* MAIN CONTENT */}
       <div style={{ maxWidth: '600px', margin: '0 auto', padding: '24px 16px', paddingBottom: '120px' }}>
-        {activeTab === 'home' && (
+        {/* NOW TAB */}
+        {activeTab === 'now' && (
           <div>
-            {filteredBars.map((bar) => {
-              const post = POSTS.find((p) => p.barId === bar.id)
-              return (
-                <div key={bar.id} style={{ backgroundColor: '#ffffff', borderRadius: '12px', overflow: 'hidden', marginBottom: '16px', border: '1px solid #e0e0e0', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)' }}>
-                  {/* CARD HEADER */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer' }} onClick={() => openPostDetail(bar.id)}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, cursor: 'pointer' }} onClick={(e) => { e.stopPropagation(); openBarProfile(bar); }}>
-                      <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', overflow: 'hidden' }}>
-                        {bar.profilePhoto ? <img src={bar.profilePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : bar.emoji}
-                      </div>
-                      <div>
-                        <div style={{ fontWeight: '600', fontSize: '14px' }}>{bar.name}</div>
-                        <div style={{ fontSize: '12px', color: '#999' }}>📍 {bar.distance}km • {bar.location}</div>
+            {barsWithRealTimeStatus.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '32px 24px' }}>
+                <div style={{ fontSize: '48px', marginBottom: '16px' }}>😴</div>
+                <p style={{ fontSize: '14px', color: '#666', marginBottom: '24px', lineHeight: '1.6' }}>Aucune actu en temps réel pour le moment.<br/>Voici les établissements du moment:</p>
+                <div style={{ display: 'grid', gap: '16px' }}>
+                  {topBarsByLikes.map((bar) => (
+                    <div key={bar.id} onClick={() => openBarProfile(bar)} style={{ backgroundColor: '#f9f9f9', padding: '16px', borderRadius: '8px', cursor: 'pointer', border: '1px solid #e0e0e0' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>
+                          {bar.profilePhoto ? <img src={bar.profilePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /> : bar.emoji}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: '600', fontSize: '14px' }}>{bar.name}</div>
+                          <div style={{ fontSize: '12px', color: '#999' }}>📍 {bar.distance}km • ❤️ {likeCount[bar.id] || 0}</div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-
-                  {/* REAL-TIME STATUS */}
-                  {(bar.currentStatus.terrasseDispo || bar.currentStatus.offreActive || bar.currentStatus.eventActive || bar.currentStatus.happyHourActive) && (
-                    <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>
-                      {bar.currentStatus.terrasseDispo && (
-                        <div style={{ fontSize: '13px', color: '#4CAF50', fontWeight: '600', marginBottom: bar.currentStatus.offreActive || bar.currentStatus.eventActive || bar.currentStatus.happyHourActive ? '6px' : '0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }} onClick={() => openPostDetail(bar.id)}>
-                          <span className="blink-dot" style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#4CAF50' }}></span>
-                          PLACES LIBRES EN TERRASSE
-                        </div>
-                      )}
-                      {bar.currentStatus.offreActive && (
-                        <div style={{ fontSize: '12px', color: COLORS.accent, fontWeight: '600', marginBottom: bar.currentStatus.eventActive || bar.currentStatus.happyHourActive ? '6px' : '0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }} onClick={() => openPostDetail(bar.id)}>
-                          🎁 +1 OFFRE SPÉCIALE EN COURS
-                          <span style={{ fontSize: '10px' }}>→</span>
-                        </div>
-                      )}
-                      {bar.currentStatus.eventActive && (
-                        <div style={{ fontSize: '12px', color: '#9C27B0', fontWeight: '600', marginBottom: bar.currentStatus.happyHourActive ? '6px' : '0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }} onClick={() => openPostDetail(bar.id)}>
-                          🎪 +1 ÉVÉNEMENT À VENIR
-                          <span style={{ fontSize: '10px' }}>→</span>
-                        </div>
-                      )}
-                      {bar.currentStatus.happyHourActive && (
-                        <div style={{ fontSize: '12px', color: '#4CAF50', fontWeight: '600', cursor: 'pointer' }} onClick={() => openPostDetail(bar.id)}>
-                          ⏰ HAPPY HOUR EN COURS
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* FILTERS */}
-                  <div style={{ padding: '12px 16px', display: 'flex', gap: '8px', flexWrap: 'wrap', borderBottom: '1px solid #f0f0f0', cursor: 'pointer' }} onClick={() => openPostDetail(bar.id)}>
-                    {bar.filters.map((f) => {
-                      const filter = FILTERS.find((opt) => opt.id === f)
-                      return filter ? <div key={f} style={{ backgroundColor: '#f0f0f0', color: '#666', padding: '4px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '4px' }}><span>{filter.emoji}</span>{filter.label}</div> : null
-                    })}
-                  </div>
-
-                  {/* PHOTO */}
-                  <div style={{ width: '100%', height: '240px', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden' }} onClick={() => openPostDetail(bar.id)}>
-                    {bar.postPhoto ? <img src={bar.postPhoto} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : '📸'}
-                  </div>
-
-                  {/* DESCRIPTION */}
-                  <div style={{ padding: '12px 16px', fontSize: '13px', color: '#1a1a1a', borderBottom: '1px solid #f0f0f0', cursor: 'pointer' }} onClick={() => openPostDetail(bar.id)}>
-                    {post?.description}
-                  </div>
-
-                  {/* FOOTER */}
-                  <div style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ fontSize: '12px', color: '#999' }}>📍 Posté à l'instant</div>
-                    <button onClick={() => toggleLike(bar.id)} style={{ padding: '6px 12px', backgroundColor: 'transparent', color: likes[bar.id] ? COLORS.primary : '#ccc', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ fontSize: '20px', transform: likes[bar.id] ? 'scale(1.3)' : 'scale(1)' }}>{likes[bar.id] ? '❤️' : '🤍'}</span>
-                      {likeCount[bar.id] || 0}
-                    </button>
-                  </div>
+                  ))}
                 </div>
-              )
-            })}
+              </div>
+            ) : (
+              barsWithRealTimeStatus.map((bar) => {
+                const post = POSTS.find((p) => p.barId === bar.id)
+                return (
+                  <BarCard
+                    key={bar.id}
+                    bar={bar}
+                    post={post}
+                    likes={likes}
+                    likeCount={likeCount}
+                    onLike={toggleLike}
+                    onBarClick={openBarProfile}
+                    onPostClick={() => openPostDetail(bar.id)}
+                    hasPhoto={true}
+                  />
+                )
+              })
+            )}
           </div>
         )}
 
-        {activeTab === 'map' && <MapTab bars={filteredBars} onBarClick={openBarProfile} />}
-        {activeTab === 'discoveries' && <DiscoveriesTab bars={BARS} onBarClick={openBarProfile} />}
+        {/* EXPLORE TAB */}
+        {activeTab === 'explore' && (
+          <div>
+            {exploreViewMode === 'list' ? (
+              filteredBars.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '48px 24px', color: '#999' }}>
+                  <p>Aucun établissement ne correspond à ta recherche</p>
+                </div>
+              ) : (
+                filteredBars.map((bar) => {
+                  const post = POSTS.find((p) => p.barId === bar.id)
+                  return (
+                    <BarCard
+                      key={bar.id}
+                      bar={bar}
+                      post={post}
+                      likes={likes}
+                      likeCount={likeCount}
+                      onLike={toggleLike}
+                      onBarClick={openBarProfile}
+                      onPostClick={() => openPostDetail(bar.id)}
+                      hasPhoto={false}
+                    />
+                  )
+                })
+              )
+            ) : (
+              <MapTab bars={filteredBars} onBarClick={openBarProfile} />
+            )}
+          </div>
+        )}
 
+        {/* À LA UNE TAB - Grandes cartes sponsor */}
+        {activeTab === 'featured' && (
+          <div>
+            {BARS.filter(b => [1, 2, 21, 3].includes(b.id)).map((bar) => (
+              <div key={bar.id} style={{ backgroundColor: '#ffffff', borderRadius: '12px', overflow: 'hidden', marginBottom: '20px', border: '3px solid #DAA520', boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)' }}>
+                {/* PHOTO SPONSOR */}
+                {bar.profilePhoto && (
+                  <div style={{ width: '100%', height: '300px', overflow: 'hidden' }}>
+                    <img src={bar.profilePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                )}
+                
+                {/* SPONSOR BADGE */}
+                <div style={{ padding: '12px 16px', backgroundColor: '#fffcf0', borderBottom: '1px solid #DAA520', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '20px' }}>⭐</span>
+                  <span style={{ fontWeight: '700', color: '#DAA520', fontSize: '14px' }}>PARTENAIRE OUSSA</span>
+                </div>
+
+                {/* HEADER */}
+                <div style={{ padding: '16px', borderBottom: '1px solid #f0f0f0' }}>
+                  <div style={{ fontSize: '24px', fontWeight: '700', color: '#1a1a1a', marginBottom: '4px' }}>{bar.name}</div>
+                  <div style={{ fontSize: '13px', color: '#999' }}>📍 {bar.location} • {bar.distance}km</div>
+                </div>
+
+                {/* DESCRIPTION */}
+                <div style={{ padding: '16px', borderBottom: '1px solid #f0f0f0' }}>
+                  <p style={{ fontSize: '14px', color: '#666', lineHeight: '1.6', margin: 0 }}>
+                    {bar.emoji} Établissement premium présenté par OUSSA. Découvrez une expérience unique dans une ambiance conviviale et accueillante.
+                  </p>
+                </div>
+
+                {/* FILTERS */}
+                <div style={{ padding: '12px 16px', display: 'flex', gap: '8px', flexWrap: 'wrap', borderBottom: '1px solid #f0f0f0' }}>
+                  {bar.filters.map((f) => {
+                    const filter = FILTERS.find((opt) => opt.id === f)
+                    return filter ? <div key={f} style={{ backgroundColor: '#f0f0f0', color: '#666', padding: '6px 12px', borderRadius: '4px', fontSize: '12px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '4px' }}><span>{filter.emoji}</span>{filter.label}</div> : null
+                  })}
+                </div>
+
+                {/* CTA */}
+                <div style={{ padding: '16px', display: 'flex', gap: '8px' }}>
+                  <button 
+                    onClick={() => openBarProfile(bar)}
+                    style={{ flex: 1, padding: '12px', backgroundColor: COLORS.primary, color: 'white', fontWeight: '600', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}
+                  >
+                    Voir la fiche
+                  </button>
+                  <button 
+                    onClick={() => toggleLike(bar.id)}
+                    style={{ padding: '12px 16px', backgroundColor: likes[bar.id] ? COLORS.primary : '#f5f5f5', color: likes[bar.id] ? 'white' : '#666', fontWeight: '600', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}
+                  >
+                    {likes[bar.id] ? '❤️' : '🤍'}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* PROFIL TAB */}
         {activeTab === 'profile' && (
           <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', textAlign: 'center', border: '1px solid #e0e0e0' }}>
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>👤</div>
@@ -363,7 +591,7 @@ export default function App() {
         </div>
       )}
 
-      {/* OFFER MODAL - Simplifié */}
+      {/* OFFER MODAL */}
       {selectedPost && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'flex-end', zIndex: 1000 }} onClick={closeModal}>
           <div style={{ backgroundColor: '#ffffff', borderRadius: '16px 16px 0 0', padding: '24px', width: '100%', maxHeight: '90vh', overflow: 'auto' }} onClick={(e) => e.stopPropagation()}>
@@ -386,7 +614,7 @@ export default function App() {
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', marginBottom: '16px' }}>
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-                      <button key={num} onClick={() => codeInput.length < 4 && setCodeInput(codeInput + num)} style={{ padding: '10px', fontSize: '14px', fontWeight: '600', backgroundColor: '#f0f0f0', color: '#1a1a1a', border: '1px solid #e0e0e0', borderRadius: '6px', cursor: codeInput.length < 4 ? 'pointer' : 'not-allowed' }}>
+                      <button key={num} onClick={() => codeInput.length < 4 && setCodeInput(codeInput + num)} style={{ padding: '10px', fontSize: '14px', fontWeight: '600', backgroundColor: '#f0f0f0', color: '#1a1a1a', border: '1px solid #e0e0e0', borderRadius: '6px', cursor: 'pointer' }}>
                         {num}
                       </button>
                     ))}
@@ -427,7 +655,12 @@ export default function App() {
 
       {/* BOTTOM NAV */}
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#ffffff', borderTop: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-around', zIndex: 100 }}>
-        {[{ id: 'home', emoji: '🏠', label: 'Accueil' }, { id: 'map', emoji: '🗺️', label: 'Carte' }, { id: 'discoveries', emoji: '✨', label: 'Découvertes' }, { id: 'profile', emoji: '👤', label: 'Profil' }].map(tab => (
+        {[
+          { id: 'now', emoji: '⚡', label: 'Now' },
+          { id: 'explore', emoji: '🗺️', label: 'Explore' },
+          { id: 'featured', emoji: '⭐', label: 'À la une' },
+          { id: 'profile', emoji: '👤', label: 'Profil' }
+        ].map(tab => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: '16px', textAlign: 'center', color: activeTab === tab.id ? COLORS.primary : '#999', backgroundColor: 'transparent', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: '600', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
             <span style={{ fontSize: '20px' }}>{tab.emoji}</span>
             {tab.label}

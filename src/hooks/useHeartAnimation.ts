@@ -10,21 +10,21 @@ export function useHeartAnimation() {
   const [floatingHearts, setFloatingHearts] = useState<FloatingHeart[]>([])
 
   const createHearts = (clickX: number, clickY: number) => {
-    // Créer 3 cœurs avec positions aléatoires autour du clic
-    for (let i = 0; i < 3; i++) {
-      const heartId = Date.now() + i
+    // Utiliser le centre de la viewport au lieu de coordonnées complexes
+    const centerX = window.innerWidth / 2
+    const centerY = window.innerHeight / 2
 
-      // Position aléatoire autour du clic (±40px)
-      const startX = clickX + (Math.random() - 0.5) * 80
-      const startY = clickY + (Math.random() - 0.5) * 80
+    const newHearts = [
+      { id: Date.now(), startX: centerX, startY: centerY },
+      { id: Date.now() + 1, startX: centerX, startY: centerY },
+      { id: Date.now() + 2, startX: centerX, startY: centerY },
+    ]
 
-      setFloatingHearts((prev) => [...prev, { id: heartId, startX, startY }])
+    setFloatingHearts((prev) => [...prev, ...newHearts])
 
-      // Supprimer le cœur après l'animation (2.5s)
-      setTimeout(() => {
-        setFloatingHearts((prev) => prev.filter((h) => h.id !== heartId))
-      }, 2500)
-    }
+    setTimeout(() => {
+      setFloatingHearts((prev) => prev.filter((h) => !newHearts.map(nh => nh.id).includes(h.id)))
+    }, 1800)
   }
 
   return {
