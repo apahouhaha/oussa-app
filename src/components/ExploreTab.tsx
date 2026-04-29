@@ -146,7 +146,7 @@ export function ExploreTab({ filteredBars, likes, likeCount, onLike, onBarClick 
     <div style={{
       position: 'relative',
       width: '100%',
-      height: '100%',
+      height: 'calc(100% - 60px)',
       display: 'flex',
       flexDirection: 'column',
       overflow: 'hidden',
@@ -174,6 +174,39 @@ export function ExploreTab({ filteredBars, likes, likeCount, onLike, onBarClick 
           backgroundColor: '#f8f8f8'
         }}
       />
+
+      {/* Recenter button - overlaid on map */}
+      <button
+        onClick={() => {
+          if (mapRef.current) {
+            mapRef.current.setView(USER_POSITION, 15, { animate: true })
+          }
+        }}
+        style={{
+          position: 'absolute',
+          top: '16px',
+          right: '16px',
+          zIndex: 9997,
+          width: '44px',
+          height: '44px',
+          borderRadius: '50%',
+          backgroundColor: '#ffffff',
+          border: 'none',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '20px',
+          transition: 'all 0.2s',
+          pointerEvents: 'auto'
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)')}
+        onMouseLeave={(e) => (e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)')}
+        title="Recentrer sur ma position"
+      >
+        📍
+      </button>
 
       {/* Mini card - always visible in first plane */}
       {selectedBarOnMap && (
@@ -269,15 +302,16 @@ export function ExploreTab({ filteredBars, likes, likeCount, onLike, onBarClick 
         </div>
       )}
 
-      {/* BOTTOM SHEET - fixed max-height to preserve nav bar */}
+      {/* BOTTOM SHEET - use maxHeight to respect parent constraints */}
       <div style={{
-        height: sheetOpen ? '65%' : '60px',
+        maxHeight: sheetOpen ? '65vh' : '60px',
+        flex: sheetOpen ? '0 0 auto' : '0 0 60px',
         backgroundColor: '#ffffff',
         borderRadius: sheetOpen ? '0' : '20px 20px 0 0',
         display: 'flex',
         flexDirection: 'column',
         boxShadow: '0 -2px 12px rgba(0, 0, 0, 0.08)',
-        transition: 'height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+        transition: 'maxHeight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
         overflow: 'hidden'
       }}>
         {/* HANDLE */}
@@ -302,7 +336,7 @@ export function ExploreTab({ filteredBars, likes, likeCount, onLike, onBarClick 
 
         {/* CONTENT */}
         {sheetOpen && (
-          <div style={{ flex: 1, overflowY: 'auto', padding: '12px 24px 120px' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px 24px', paddingBottom: '120px' }}>
             <input
               type="text"
               placeholder="Rechercher..."
