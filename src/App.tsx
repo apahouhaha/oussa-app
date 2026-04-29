@@ -7,6 +7,7 @@ import { COLORS } from './constants/styles'
 import { MapTab } from './components/MapTab'
 import { SponsorshipBanner } from './components/SponsorshipBanner'
 import { DiscoveriesTab } from './components/DiscoveriesTab'
+import { ExploreTab } from './components/ExploreTab'
 import { useFiltering } from './hooks/useFiltering'
 
 // Style global pour animations
@@ -57,7 +58,7 @@ if (typeof document !== 'undefined') {
 }
 
 // Composant Card réutilisable pour NOW et EXPLORE
-function BarCard({ bar, post, likes, likeCount, onLike, onBarClick, onPostClick, hasPhoto = true }: any) {
+function BarCard({ bar, post, likes, likeCount, onLike, onBarClick, onPostClick, hasPhoto = true, onEventClick }: any) {
   return (
     <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', overflow: 'hidden', marginBottom: '16px', border: '1px solid #e0e0e0', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)' }}>
       {/* CARD HEADER */}
@@ -89,7 +90,7 @@ function BarCard({ bar, post, likes, likeCount, onLike, onBarClick, onPostClick,
             </div>
           )}
           {bar.currentStatus.eventActive && (
-            <div style={{ fontSize: '12px', color: '#9C27B0', fontWeight: '600', marginBottom: bar.currentStatus.happyHourActive ? '6px' : '0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }} onClick={onPostClick}>
+            <div style={{ fontSize: '12px', color: '#9C27B0', fontWeight: '600', marginBottom: bar.currentStatus.happyHourActive ? '6px' : '0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }} onClick={() => onEventClick?.(bar.id)}>
               🎪 +1 ÉVÉNEMENT À VENIR
               <span style={{ fontSize: '10px' }}>→</span>
             </div>
@@ -102,34 +103,46 @@ function BarCard({ bar, post, likes, likeCount, onLike, onBarClick, onPostClick,
         </div>
       )}
 
-      {/* FILTERS - Seulement sur EXPLORE */}
-      {!hasPhoto && bar.filters && (
-        <div style={{ padding: '12px 16px', display: 'flex', gap: '8px', flexWrap: 'wrap', borderBottom: '1px solid #f0f0f0', cursor: 'pointer' }} onClick={onPostClick}>
-          {bar.filters.map((f: string) => {
-            const filter = FILTERS.find((opt) => opt.id === f)
-            return filter ? <div key={f} style={{ backgroundColor: '#f0f0f0', color: '#666', padding: '4px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '4px' }}><span>{filter.emoji}</span>{filter.label}</div> : null
-          })}
+      {/* POST CONTENT - SANS PHOTO */}
+      {post && (
+        <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>
+          {post.postText && (
+            <p style={{ margin: '0 0 12px 0', fontSize: '13px', color: '#333', lineHeight: '1.5' }}>
+              {post.postText}
+            </p>
+          )}
+          {post.discountCode && (
+            <div style={{ backgroundColor: COLORS.accent, color: 'white', padding: '8px 12px', borderRadius: '6px', fontWeight: '700', textAlign: 'center', fontSize: '14px', marginBottom: '8px' }}>
+              Code: {post.discountCode}
+            </div>
+          )}
+          {post.type === 'event' && (
+            <div style={{ backgroundColor: '#f0e6ff', color: '#9C27B0', padding: '8px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '600' }}>
+              🎪 Événement à venir
+            </div>
+          )}
         </div>
       )}
 
-      {/* PHOTO - Affiche uniquement si présente */}
-      {bar.postPhoto && (
-        <div style={{ width: '100%', height: '240px', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden' }} onClick={onPostClick}>
-          <img src={bar.postPhoto} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        </div>
-      )}
-
-      {/* DESCRIPTION */}
-      <div style={{ padding: '12px 16px', fontSize: '13px', color: '#1a1a1a', borderBottom: '1px solid #f0f0f0', cursor: 'pointer' }} onClick={onPostClick}>
-        {post?.description}
-      </div>
-
-      {/* FOOTER */}
-      <div style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ fontSize: '12px', color: '#999' }}>📍 À l'instant</div>
-        <button onClick={() => onLike(bar.id)} style={{ padding: '6px 12px', backgroundColor: 'transparent', color: likes[bar.id] ? COLORS.primary : '#ccc', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ fontSize: '20px', transform: likes[bar.id] ? 'scale(1.3)' : 'scale(1)' }}>{likes[bar.id] ? '❤️' : '🤍'}</span>
-          {likeCount[bar.id] || 0}
+      {/* LIKE BUTTON */}
+      <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontSize: '12px', color: '#999' }}>{likeCount[bar.id] || 0} aime{(likeCount[bar.id] || 0) > 1 ? 's' : ''}</span>
+        <button
+          onClick={() => onLike(bar.id)}
+          style={{
+            backgroundColor: likes[bar.id] ? COLORS.primary : '#f5f5f5',
+            color: likes[bar.id] ? 'white' : '#666',
+            border: 'none',
+            padding: '8px 16px',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontWeight: '600',
+            fontSize: '13px',
+            transition: 'all 0.2s'
+          }}
+          className={likes[bar.id] ? 'heart-animation' : ''}
+        >
+          {likes[bar.id] ? '❤️ Aimé' : '🤍 Aimer'}
         </button>
       </div>
     </div>
@@ -137,34 +150,33 @@ function BarCard({ bar, post, likes, likeCount, onLike, onBarClick, onPostClick,
 }
 
 export default function App() {
-  const [user, setUser] = useState<any>(null)
-  const [email, setEmail] = useState('test@example.com')
   const [activeTab, setActiveTab] = useState('now')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedFilters, setSelectedFilters] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [activeFloatingFilter, setActiveFloatingFilter] = useState<string | null>(null)
-  const [exploreViewMode, setExploreViewMode] = useState<'list' | 'map'>('list')
-  const [likes, setLikes] = useState<{ [key: number]: boolean }>({})
-  const [likeCount, setLikeCount] = useState<{ [key: number]: number }>({})
-  const [selectedBar, setSelectedBar] = useState<any>(null)
-  const [selectedPost, setSelectedPost] = useState<any>(null)
-  const [codeInput, setCodeInput] = useState('')
-  const [codeVerified, setCodeVerified] = useState(false)
-  const [barLikes, setBarLikes] = useState<{ [key: number]: boolean }>({})
-  const [barLikeCount, setBarLikeCount] = useState<{ [key: number]: number }>({})
-  const [showCelebration, setShowCelebration] = useState(false)
+  const [likes, setLikes] = useState<Record<number, boolean>>({})
+  const [likeCount, setLikeCount] = useState<Record<number, number>>({
+    1: 48, 2: 92, 3: 156, 21: 73, 4: 45, 5: 67, 6: 34, 7: 89, 8: 52, 9: 120,
+    10: 41, 11: 78, 12: 95, 13: 63, 14: 84, 15: 109, 16: 56, 17: 71, 18: 88, 19: 102,
+    20: 67, 22: 92, 23: 55, 24: 74, 25: 81, 26: 98, 27: 47, 28: 65, 29: 79, 30: 113,
+    31: 58, 32: 91, 33: 66, 34: 85, 35: 107, 36: 49, 37: 72, 38: 89, 39: 104, 40: 62,
+    41: 76, 42: 93, 43: 57, 44: 82, 45: 99, 46: 51, 47: 69, 48: 86, 49: 110, 50: 64
+  })
+  const [selectedPostDetail, setSelectedPostDetail] = useState<any>(null)
+  const [selectedBarProfile, setSelectedBarProfile] = useState<any>(null)
+  const [photoCarouselIndex, setPhotoCarouselIndex] = useState(0)
 
-  // Utiliser le hook useFiltering
-  const { filteredBars, floatingButtonCounts } = useFiltering({
+  // Logique filtrage EXPLORE
+  const filteredBars = useFiltering({
     bars: BARS,
     searchTerm,
     selectedCategory,
     selectedFilters,
-    activeFloatingFilter,
-  })
+    activeFloatingFilter: null // EXPLORE n'utilise pas de filtre flottant
+  }).filteredBars
 
-  // Filtrer les bars avec statut temps réel pour NOW
+  // Logique pour NOW: filtrer les bars avec statuts temps réel
   let barsWithRealTimeStatus = BARS.filter(b => 
     b.currentStatus.terrasseDispo || 
     b.currentStatus.offreActive || 
@@ -183,265 +195,189 @@ export default function App() {
     })
   }
 
-  // Tri: terrasse dispo en priorité, puis par distance
+  // Tri: si filtre "offre" actif, les offres en premier, sinon terrasse dispo en priorité
   barsWithRealTimeStatus = barsWithRealTimeStatus.sort((a, b) => {
-    const aTerrasse = a.currentStatus.terrasseDispo ? 0 : 1
-    const bTerrasse = b.currentStatus.terrasseDispo ? 0 : 1
-    if (aTerrasse !== bTerrasse) return aTerrasse - bTerrasse
+    if (activeFloatingFilter === 'offre') {
+      const aOffer = a.currentStatus.offreActive ? 0 : 1
+      const bOffer = b.currentStatus.offreActive ? 0 : 1
+      if (aOffer !== bOffer) return aOffer - bOffer
+    } else {
+      const aTerrasse = a.currentStatus.terrasseDispo ? 0 : 1
+      const bTerrasse = b.currentStatus.terrasseDispo ? 0 : 1
+      if (aTerrasse !== bTerrasse) return aTerrasse - bTerrasse
+    }
     return a.distance - b.distance
   })
 
-  // Top bars pour empty state (par likes)
-  const topBarsByLikes = [...BARS].sort((a, b) => 
-    (likeCount[b.id] || 0) - (likeCount[a.id] || 0)
-  ).slice(0, 6)
-
-  useEffect(() => {
-    const likesCounts: { [key: number]: number } = {}
-    BARS.forEach((bar) => {
-      likesCounts[bar.id] = parseInt(localStorage.getItem(`bar_likes_${bar.id}`) || '0')
-    })
-    setLikeCount(likesCounts)
-    window.scrollTo(0, 0)
-  }, [activeTab])
-
-  const handleLogin = () => {
-    setUser({ email, id: 'test' })
-  }
-
-  const handleLogout = () => {
-    setUser(null)
-  }
-
   const toggleLike = (barId: number) => {
-    setLikes((prev) => {
-      const newLikes = { ...prev }
-      newLikes[barId] = !newLikes[barId]
-      return newLikes
-    })
-    setLikeCount((prev) => {
-      const newCount = { ...prev }
-      newCount[barId] = (newCount[barId] || 0) + (likes[barId] ? -1 : 1)
-      localStorage.setItem(`bar_likes_${barId}`, String(newCount[barId]))
-      return newCount
-    })
-  }
-
-  const toggleBarLike = (barId: number) => {
-    setBarLikes((prev) => {
-      const newLikes = { ...prev }
-      newLikes[barId] = !newLikes[barId]
-      return newLikes
-    })
-    setBarLikeCount((prev) => {
-      const newCount = { ...prev }
-      newCount[barId] = (newCount[barId] || 0) + (barLikes[barId] ? -1 : 1)
-      localStorage.setItem(`bar_profile_likes_${barId}`, String(newCount[barId]))
-      return newCount
-    })
-  }
-
-  const toggleFilter = (filterId: string) => {
-    setSelectedFilters((prev) =>
-      prev.includes(filterId) ? prev.filter((f) => f !== filterId) : [...prev, filterId]
-    )
+    setLikes(prev => ({
+      ...prev,
+      [barId]: !prev[barId]
+    }))
+    setLikeCount(prev => ({
+      ...prev,
+      [barId]: (prev[barId] || 0) + (likes[barId] ? -1 : 1)
+    }))
   }
 
   const openBarProfile = (bar: any) => {
-    setSelectedBar(bar)
+    setSelectedBarProfile(bar)
+  }
+
+  const closeBarProfile = () => {
+    setSelectedBarProfile(null)
   }
 
   const openPostDetail = (barId: number) => {
-    const bar = BARS.find((b) => b.id === barId)
-    const post = POSTS.find((p) => p.barId === barId)
-    if (bar && post) {
-      setSelectedPost({ ...post, bar })
-      setCodeInput('')
-      setCodeVerified(false)
+    const post = POSTS.find(p => p.barId === barId)
+    if (post) {
+      setSelectedPostDetail(post)
     }
   }
 
-  const completeOffer = () => {
-    setShowCelebration(true)
-    setTimeout(() => {
-      setShowCelebration(false)
-      closeModal()
-    }, 3000)
+  const closePostDetail = () => {
+    setSelectedPostDetail(null)
   }
 
-  const closeModal = () => {
-    setSelectedBar(null)
-    setSelectedPost(null)
+  const openEventPost = (barId: number) => {
+    const eventPost = POSTS.find(p => p.barId === barId && p.type === 'event')
+    if (eventPost) {
+      setSelectedPostDetail(eventPost)
+    }
   }
 
-  const isCodeCorrect = codeInput.length === 4 && codeInput === selectedPost?.specialOfferCode
-
-  // LOGIN SCREEN
-  if (!user) {
-    return (
-      <div style={{ minHeight: '100vh', backgroundColor: '#ffffff', color: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ width: '100%', maxWidth: '400px', padding: '48px 24px', textAlign: 'center' }}>
-          <div style={{ fontSize: '64px', marginBottom: '24px' }}>🍻</div>
-          <h1 style={{ fontSize: '32px', fontWeight: '700', color: COLORS.primary, marginBottom: '8px' }}>OUSSA</h1>
-          <p style={{ fontSize: '14px', color: '#666', marginBottom: '32px' }}>Quoi faire maintenant? Des idées fraîches, postées en direct</p>
-          <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: '100%', padding: '12px 16px', marginBottom: '16px', backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', borderRadius: '8px', color: '#1a1a1a', fontSize: '14px', boxSizing: 'border-box' }} />
-          <button onClick={handleLogin} style={{ width: '100%', padding: '12px', marginBottom: '12px', backgroundColor: COLORS.primary, color: 'white', fontWeight: '600', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}>Te connecter</button>
-        </div>
-      </div>
-    )
-  }
-
+  // UI
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#ffffff', color: '#1a1a1a' }}>
-      {/* SPONSORSHIP BANNER - Uniquement sur NOW */}
-      {activeTab === 'now' && (
-        <SponsorshipBanner 
-          sponsors={BARS.filter(b => [1, 2, 21, 3].includes(b.id))} 
-          onBarClick={(barId) => openBarProfile(BARS.find(b => b.id === barId)!)}
-        />
+    <div style={{ backgroundColor: '#fafafa', minHeight: '100vh', paddingBottom: '80px' }}>
+      {/* MODALS */}
+      {selectedPostDetail && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'flex-end', zIndex: 1000 }}>
+          <div style={{ backgroundColor: '#ffffff', width: '100%', maxHeight: '90vh', borderRadius: '20px 20px 0 0', overflow: 'auto', animation: 'fadeInScale 0.3s ease-out' }}>
+            <div style={{ padding: '20px', position: 'sticky', top: 0, backgroundColor: '#ffffff', borderBottom: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2>Détail du post</h2>
+              <button onClick={closePostDetail} style={{ backgroundColor: 'transparent', border: 'none', fontSize: '24px', cursor: 'pointer' }}>×</button>
+            </div>
+            {selectedPostDetail.postPhoto && (
+              <div style={{ width: '100%', height: '300px', backgroundColor: '#f0f0f0', overflow: 'hidden' }}>
+                <img src={selectedPostDetail.postPhoto} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+            )}
+            <div style={{ padding: '20px' }}>
+              <p style={{ fontSize: '14px', color: '#333', lineHeight: '1.6', marginBottom: '12px' }}>{selectedPostDetail.postText}</p>
+              {selectedPostDetail.discountCode && (
+                <div style={{ backgroundColor: COLORS.accent, color: 'white', padding: '12px', borderRadius: '8px', fontWeight: '700', textAlign: 'center', marginBottom: '12px' }}>
+                  Code: {selectedPostDetail.discountCode}
+                </div>
+              )}
+              {selectedPostDetail.type === 'event' && (
+                <div style={{ backgroundColor: '#f0e6ff', color: '#9C27B0', padding: '12px', borderRadius: '8px', fontWeight: '600', textAlign: 'center' }}>
+                  🎪 {selectedPostDetail.eventName || 'Événement'}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* FLOATING BUTTONS - Pastilles rondes NOW tab */}
-      {activeTab === 'now' && (
-        <div style={{ padding: '12px 24px', borderBottom: '1px solid #e0e0e0', overflowX: 'auto' }}>
-          <div style={{ display: 'flex', gap: '8px', minWidth: 'min-content', justifyContent: 'center' }}>
-            {[
-              { id: 'terrasse', emoji: '🏖️', color: '#FF6B35' },
-              { id: 'offre', emoji: '🎁', color: '#DAA520' },
-              { id: 'event', emoji: '🎪', color: '#9C27B0' },
-              { id: 'happyHour', emoji: '⏰', color: '#4CAF50' }
-            ].map(btn => (
-              <button
-                key={btn.id}
-                onClick={() => setActiveFloatingFilter(activeFloatingFilter === btn.id ? null : btn.id)}
-                style={{
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: '50%',
-                  backgroundColor: activeFloatingFilter === btn.id ? btn.color : '#ffffff',
-                  border: `3px solid ${activeFloatingFilter === btn.id ? btn.color : '#e0e0e0'}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  fontSize: '20px',
-                  transition: 'all 0.3s',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+      {selectedBarProfile && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'flex-end', zIndex: 1000 }}>
+          <div style={{ backgroundColor: '#ffffff', width: '100%', maxHeight: '90vh', borderRadius: '20px 20px 0 0', overflow: 'auto' }}>
+            <div style={{ padding: '20px', position: 'sticky', top: 0, backgroundColor: '#ffffff', borderBottom: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2>Profil établissement</h2>
+              <button onClick={closeBarProfile} style={{ backgroundColor: 'transparent', border: 'none', fontSize: '24px', cursor: 'pointer' }}>×</button>
+            </div>
+            <div style={{ padding: '20px' }}>
+              <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                <div style={{ width: '100px', height: '100px', borderRadius: '50%', backgroundColor: '#f5f5f5', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '48px', overflow: 'hidden' }}>
+                  {selectedBarProfile.profilePhoto ? <img src={selectedBarProfile.profilePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : selectedBarProfile.emoji}
+                </div>
+                <h1 style={{ margin: '0 0 4px 0', fontSize: '24px' }}>{selectedBarProfile.name}</h1>
+                <p style={{ margin: '0 0 12px 0', color: '#999', fontSize: '14px' }}>{selectedBarProfile.location}</p>
+              </div>
+              <p style={{ color: '#666', lineHeight: '1.6', marginBottom: '20px' }}>Découvrez cet établissement avec tous ses services et ses avantages.</p>
+              <button 
+                onClick={() => toggleLike(selectedBarProfile.id)}
+                style={{ 
+                  width: '100%', 
+                  padding: '12px', 
+                  backgroundColor: likes[selectedBarProfile.id] ? COLORS.primary : '#f5f5f5', 
+                  color: likes[selectedBarProfile.id] ? 'white' : '#666', 
+                  border: 'none', 
+                  borderRadius: '8px', 
+                  fontWeight: '600', 
+                  cursor: 'pointer' 
                 }}
               >
-                {btn.emoji}
+                {likes[selectedBarProfile.id] ? '❤️ Vous aimez' : '🤍 Aimer'}
               </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* HEADER - Visible sur EXPLORE */}
-      {activeTab === 'explore' && (
-        <div style={{ padding: '16px 24px', borderBottom: '1px solid #e0e0e0' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-            <div style={{ fontSize: '12px', color: '#666' }}>📍 Mouvaux</div>
-            <div style={{ fontSize: '12px', color: '#666' }}>9:41</div>
-          </div>
-          <input type="text" placeholder="Rechercher bars, cafés..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} style={{ width: '100%', padding: '12px 16px', backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', borderRadius: '8px', color: '#1a1a1a', fontSize: '14px', boxSizing: 'border-box' }} />
-        </div>
-      )}
-
-      {/* CATEGORIES - Seulement sur EXPLORE */}
-      {activeTab === 'explore' && (
-        <div style={{ borderBottom: '1px solid #e0e0e0', overflowX: 'auto', padding: '12px 0', paddingLeft: '24px' }}>
-          <div style={{ display: 'flex', gap: '12px', minWidth: 'min-content' }}>
-            {CATEGORIES.map((cat) => (
-              <button key={cat.id} onClick={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', padding: '12px 16px', backgroundColor: selectedCategory === cat.id ? COLORS.primary : '#f5f5f5', color: selectedCategory === cat.id ? 'white' : '#1a1a1a', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: '500', whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
-                <span style={{ fontSize: '20px' }}>{cat.emoji}</span>
-                {cat.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* FILTERS - Seulement sur EXPLORE */}
-      {activeTab === 'explore' && (
-        <div style={{ borderBottom: '1px solid #e0e0e0', overflowX: 'auto', padding: '12px 0', paddingLeft: '24px' }}>
-          <div style={{ display: 'flex', gap: '8px', minWidth: 'min-content' }}>
-            {FILTERS.map((filter) => (
-              <button key={filter.id} onClick={() => toggleFilter(filter.id)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', backgroundColor: selectedFilters.includes(filter.id) ? COLORS.primary : '#f5f5f5', color: selectedFilters.includes(filter.id) ? 'white' : '#666', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '500', whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
-                <span>{filter.emoji}</span>
-                {filter.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* RESULTS COUNT + VIEW MODE TOGGLE */}
-      {activeTab === 'explore' && (
-        <div style={{ padding: '12px 24px', backgroundColor: '#f9f9f9', borderBottom: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ fontSize: '13px', color: '#666', fontWeight: '500' }}>
-            {filteredBars.length} résultat{filteredBars.length > 1 ? 's' : ''}
-          </div>
-          <div style={{ display: 'flex', gap: '6px', backgroundColor: '#e0e0e0', padding: '4px', borderRadius: '6px' }}>
-            <button
-              onClick={() => setExploreViewMode('list')}
-              style={{
-                padding: '6px 12px',
-                backgroundColor: exploreViewMode === 'list' ? '#ffffff' : 'transparent',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '12px',
-                fontWeight: '600',
-                color: exploreViewMode === 'list' ? '#1a1a1a' : '#666',
-                transition: 'all 0.2s'
-              }}
-            >
-              📋 Liste
-            </button>
-            <button
-              onClick={() => setExploreViewMode('map')}
-              style={{
-                padding: '6px 12px',
-                backgroundColor: exploreViewMode === 'map' ? '#ffffff' : 'transparent',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '12px',
-                fontWeight: '600',
-                color: exploreViewMode === 'map' ? '#1a1a1a' : '#666',
-                transition: 'all 0.2s'
-              }}
-            >
-              🗺️ Carte
-            </button>
+            </div>
           </div>
         </div>
       )}
 
       {/* MAIN CONTENT */}
-      <div style={{ maxWidth: '600px', margin: '0 auto', padding: '24px 16px', paddingBottom: '120px' }}>
+      <div style={{ maxWidth: '500px', margin: '0 auto' }}>
+        {/* HEADER */}
+        <div style={{ backgroundColor: '#ffffff', padding: '12px 24px', borderBottom: '1px solid #e0e0e0', position: 'sticky', top: 0, zIndex: 100 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <h1 style={{ margin: 0, fontSize: '18px', fontWeight: '700' }}>OUSSA</h1>
+            <span style={{ fontSize: '24px' }}>📍</span>
+          </div>
+        </div>
+
+      {/* FLOATING BUTTONS - NOW TAB */}
+        {activeTab === 'now' && (
+          <div style={{ padding: '12px 24px', borderBottom: '1px solid #e0e0e0' }}>
+            <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              {[
+                { id: 'terrasse', emoji: '🏖️', label: 'Terrasse libre', color: '#FF6B35' },
+                { id: 'offre', emoji: '🎁', label: 'Offres Spéciales', color: '#DAA520' },
+                { id: 'event', emoji: '🎪', label: 'Événement', color: '#9C27B0' },
+                { id: 'happyHour', emoji: '⏰', label: 'Happy hour', color: '#4CAF50' }
+              ].map(btn => (
+                <div key={btn.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', cursor: 'pointer' }} onClick={() => setActiveFloatingFilter(activeFloatingFilter === btn.id ? null : btn.id)}>
+                  <button
+                    style={{
+                      width: '48px',
+                      height: '48px',
+                      borderRadius: '50%',
+                      backgroundColor: activeFloatingFilter === btn.id ? btn.color : '#ffffff',
+                      border: `3px solid ${activeFloatingFilter === btn.id ? btn.color : '#e0e0e0'}`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      fontSize: '20px',
+                      transition: 'all 0.3s',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+                    }}
+                  >
+                    {btn.emoji}
+                  </button>
+                  <div style={{ fontSize: '11px', fontWeight: '600', color: '#666', textAlign: 'center', maxWidth: '60px' }}>
+                    {btn.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* RESULTS COUNT */}
+        {activeTab === 'now' && (
+          <div style={{ padding: '12px 24px', backgroundColor: '#f9f9f9', borderBottom: '1px solid #e0e0e0', fontSize: '13px', color: '#666', fontWeight: '500' }}>
+            {barsWithRealTimeStatus.length} actu{barsWithRealTimeStatus.length > 1 ? 's' : ''} en temps réel
+          </div>
+        )}
+
+        {/* TABS CONTENT */}
         {/* NOW TAB */}
         {activeTab === 'now' && (
-          <div>
+          <div style={{ padding: '12px 24px' }}>
             {barsWithRealTimeStatus.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '32px 24px' }}>
-                <div style={{ fontSize: '48px', marginBottom: '16px' }}>😴</div>
-                <p style={{ fontSize: '14px', color: '#666', marginBottom: '24px', lineHeight: '1.6' }}>Aucune actu en temps réel pour le moment.<br/>Voici les établissements du moment:</p>
-                <div style={{ display: 'grid', gap: '16px' }}>
-                  {topBarsByLikes.map((bar) => (
-                    <div key={bar.id} onClick={() => openBarProfile(bar)} style={{ backgroundColor: '#f9f9f9', padding: '16px', borderRadius: '8px', cursor: 'pointer', border: '1px solid #e0e0e0' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>
-                          {bar.profilePhoto ? <img src={bar.profilePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /> : bar.emoji}
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: '600', fontSize: '14px' }}>{bar.name}</div>
-                          <div style={{ fontSize: '12px', color: '#999' }}>📍 {bar.distance}km • ❤️ {likeCount[bar.id] || 0}</div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              <div style={{ textAlign: 'center', padding: '48px 24px', color: '#999' }}>
+                <p>Aucune actu en temps réel</p>
+                <p style={{ fontSize: '12px', marginTop: '12px' }}>Voici les établissements les plus populaires</p>
               </div>
             ) : (
               barsWithRealTimeStatus.map((bar) => {
@@ -456,7 +392,8 @@ export default function App() {
                     onLike={toggleLike}
                     onBarClick={openBarProfile}
                     onPostClick={() => openPostDetail(bar.id)}
-                    hasPhoto={true}
+                    onEventClick={openEventPost}
+                    hasPhoto={false}
                   />
                 )
               })
@@ -464,208 +401,139 @@ export default function App() {
           </div>
         )}
 
-        {/* EXPLORE TAB */}
+      {/* EXPLORE TAB - Draggable BottomSheet + Map - FULLSCREEN */}
         {activeTab === 'explore' && (
-          <div>
-            {exploreViewMode === 'list' ? (
-              filteredBars.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '48px 24px', color: '#999' }}>
-                  <p>Aucun établissement ne correspond à ta recherche</p>
-                </div>
-              ) : (
-                filteredBars.map((bar) => {
-                  const post = POSTS.find((p) => p.barId === bar.id)
-                  return (
-                    <BarCard
-                      key={bar.id}
-                      bar={bar}
-                      post={post}
-                      likes={likes}
-                      likeCount={likeCount}
-                      onLike={toggleLike}
-                      onBarClick={openBarProfile}
-                      onPostClick={() => openPostDetail(bar.id)}
-                      hasPhoto={false}
-                    />
-                  )
-                })
-              )
-            ) : (
-              <MapTab bars={filteredBars} onBarClick={openBarProfile} />
-            )}
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 50 }}>
+            <ExploreTab 
+              filteredBars={BARS}
+              likes={likes}
+              likeCount={likeCount}
+              onLike={toggleLike}
+              onBarClick={openBarProfile}
+            />
           </div>
         )}
 
-        {/* À LA UNE TAB - Grandes cartes sponsor */}
+        {/* À LA UNE TAB */}
         {activeTab === 'featured' && (
-          <div>
-            {BARS.filter(b => [1, 2, 21, 3].includes(b.id)).map((bar) => (
-              <div key={bar.id} style={{ backgroundColor: '#ffffff', borderRadius: '12px', overflow: 'hidden', marginBottom: '20px', border: '3px solid #DAA520', boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)' }}>
-                {/* PHOTO SPONSOR */}
-                {bar.profilePhoto && (
-                  <div style={{ width: '100%', height: '300px', overflow: 'hidden' }}>
-                    <img src={bar.profilePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <div style={{ padding: '12px 24px' }}>
+            {BARS.filter(b => [1, 2, 21, 3].includes(b.id)).map((bar) => {
+              const barPosts = POSTS.filter(p => p.barId === bar.id && p.postPhoto)
+              return (
+                <div key={bar.id} style={{ backgroundColor: '#ffffff', borderRadius: '12px', overflow: 'hidden', marginBottom: '20px', border: '3px solid #DAA520', boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)' }}>
+                  {/* SPONSOR BADGE */}
+                  <div style={{ padding: '12px 16px', backgroundColor: '#fffcf0', borderBottom: '1px solid #DAA520', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '20px' }}>⭐</span>
+                    <span style={{ fontWeight: '700', color: '#DAA520', fontSize: '14px' }}>PARTENAIRE OUSSA</span>
                   </div>
-                )}
-                
-                {/* SPONSOR BADGE */}
-                <div style={{ padding: '12px 16px', backgroundColor: '#fffcf0', borderBottom: '1px solid #DAA520', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '20px' }}>⭐</span>
-                  <span style={{ fontWeight: '700', color: '#DAA520', fontSize: '14px' }}>PARTENAIRE OUSSA</span>
-                </div>
 
-                {/* HEADER */}
-                <div style={{ padding: '16px', borderBottom: '1px solid #f0f0f0' }}>
-                  <div style={{ fontSize: '24px', fontWeight: '700', color: '#1a1a1a', marginBottom: '4px' }}>{bar.name}</div>
-                  <div style={{ fontSize: '13px', color: '#999' }}>📍 {bar.location} • {bar.distance}km</div>
-                </div>
+                  {/* AVATAR */}
+                  <div style={{ padding: '16px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '40px', overflow: 'hidden', flexShrink: 0 }}>
+                      {bar.profilePhoto ? <img src={bar.profilePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : bar.emoji}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '24px', fontWeight: '700', color: '#1a1a1a', marginBottom: '4px' }}>{bar.name}</div>
+                      <div style={{ fontSize: '13px', color: '#999' }}>📍 {bar.location} • {bar.distance}km</div>
+                    </div>
+                  </div>
 
-                {/* DESCRIPTION */}
-                <div style={{ padding: '16px', borderBottom: '1px solid #f0f0f0' }}>
-                  <p style={{ fontSize: '14px', color: '#666', lineHeight: '1.6', margin: 0 }}>
-                    {bar.emoji} Établissement premium présenté par OUSSA. Découvrez une expérience unique dans une ambiance conviviale et accueillante.
-                  </p>
-                </div>
+                  {/* PHOTO CAROUSEL */}
+                  {barPosts.length > 0 && (
+                    <div style={{ position: 'relative', width: '100%', height: '300px', backgroundColor: '#f5f5f5', overflow: 'hidden' }}>
+                      <img src={barPosts[photoCarouselIndex].postPhoto} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      {barPosts.length > 1 && (
+                        <div style={{ position: 'absolute', bottom: '12px', right: '12px', backgroundColor: 'rgba(0, 0, 0, 0.6)', color: 'white', padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '600' }}>
+                          {photoCarouselIndex + 1} / {barPosts.length}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
-                {/* FILTERS */}
-                <div style={{ padding: '12px 16px', display: 'flex', gap: '8px', flexWrap: 'wrap', borderBottom: '1px solid #f0f0f0' }}>
-                  {bar.filters.map((f) => {
-                    const filter = FILTERS.find((opt) => opt.id === f)
-                    return filter ? <div key={f} style={{ backgroundColor: '#f0f0f0', color: '#666', padding: '6px 12px', borderRadius: '4px', fontSize: '12px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '4px' }}><span>{filter.emoji}</span>{filter.label}</div> : null
-                  })}
-                </div>
+                  {/* DESCRIPTION */}
+                  <div style={{ padding: '16px', borderBottom: '1px solid #f0f0f0' }}>
+                    <p style={{ fontSize: '14px', color: '#666', lineHeight: '1.6', margin: '0 0 12px 0' }}>
+                      {bar.emoji} Établissement premium présenté par OUSSA. Découvrez une expérience unique dans une ambiance conviviale et accueillante. Venez profiter de nos services et de notre hospitalité.
+                    </p>
+                  </div>
 
-                {/* CTA */}
-                <div style={{ padding: '16px', display: 'flex', gap: '8px' }}>
-                  <button 
-                    onClick={() => openBarProfile(bar)}
-                    style={{ flex: 1, padding: '12px', backgroundColor: COLORS.primary, color: 'white', fontWeight: '600', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}
-                  >
-                    Voir la fiche
-                  </button>
-                  <button 
-                    onClick={() => toggleLike(bar.id)}
-                    style={{ padding: '12px 16px', backgroundColor: likes[bar.id] ? COLORS.primary : '#f5f5f5', color: likes[bar.id] ? 'white' : '#666', fontWeight: '600', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}
-                  >
-                    {likes[bar.id] ? '❤️' : '🤍'}
-                  </button>
+                  {/* FILTERS */}
+                  <div style={{ padding: '12px 16px', display: 'flex', gap: '8px', flexWrap: 'wrap', borderBottom: '1px solid #f0f0f0' }}>
+                    {bar.filters.map((f) => {
+                      const filter = FILTERS.find((opt) => opt.id === f)
+                      return filter ? <div key={f} style={{ backgroundColor: '#f0f0f0', color: '#666', padding: '6px 12px', borderRadius: '4px', fontSize: '12px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '4px' }}><span>{filter.emoji}</span>{filter.label}</div> : null
+                    })}
+                  </div>
+
+                  {/* CTA */}
+                  <div style={{ padding: '16px', display: 'flex', gap: '8px' }}>
+                    <button 
+                      onClick={() => openBarProfile(bar)}
+                      style={{ flex: 1, padding: '12px', backgroundColor: COLORS.primary, color: 'white', fontWeight: '600', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}
+                    >
+                      Voir la fiche
+                    </button>
+                    <button 
+                      onClick={() => toggleLike(bar.id)}
+                      style={{ padding: '12px 16px', backgroundColor: likes[bar.id] ? COLORS.primary : '#f5f5f5', color: likes[bar.id] ? 'white' : '#666', fontWeight: '600', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}
+                    >
+                      {likes[bar.id] ? '❤️' : '🤍'}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
 
         {/* PROFIL TAB */}
         {activeTab === 'profile' && (
-          <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', textAlign: 'center', border: '1px solid #e0e0e0' }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>👤</div>
-            <p style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>{email.split('@')[0]}</p>
-            <p style={{ fontSize: '12px', color: '#999', marginBottom: '24px' }}>{email}</p>
-            <button onClick={handleLogout} style={{ width: '100%', padding: '12px', backgroundColor: COLORS.primary, color: 'white', fontWeight: '600', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}>Te déconnecter</button>
+          <div style={{ padding: '24px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+              <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: '#f5f5f5', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '36px' }}>👤</div>
+              <h2 style={{ margin: '0 0 4px 0' }}>Utilisateur OUSSA</h2>
+              <p style={{ color: '#999', margin: 0 }}>Profil local</p>
+            </div>
+            <button style={{ width: '100%', padding: '12px', backgroundColor: '#f5f5f5', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', color: '#d32f2f' }}>
+              Se déconnecter
+            </button>
           </div>
         )}
       </div>
 
-      {/* MODALS */}
-      {selectedBar && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'flex-end', zIndex: 1000 }} onClick={closeModal}>
-          <div style={{ backgroundColor: '#ffffff', borderRadius: '16px 16px 0 0', padding: '24px', width: '100%', maxHeight: '90vh', overflow: 'auto' }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '20px', fontWeight: '700', margin: 0 }}>{selectedBar.name}</h2>
-              <button onClick={closeModal} style={{ backgroundColor: '#f5f5f5', border: 'none', borderRadius: '6px', padding: '8px 12px', cursor: 'pointer', fontSize: '18px' }}>✕</button>
-            </div>
-            {selectedBar.profilePhoto && <div style={{ width: '100%', height: '180px', backgroundColor: '#f5f5f5', borderRadius: '8px', marginBottom: '16px', overflow: 'hidden' }}><img src={selectedBar.profilePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>}
-            <div style={{ backgroundColor: '#f9f9f9', padding: '16px', borderRadius: '8px', marginBottom: '16px' }}>
-              <p style={{ fontSize: '12px', color: '#999', margin: '0 0 4px 0', fontWeight: '500' }}>📍 Localisation</p>
-              <p style={{ fontSize: '13px', margin: '0 0 16px 0' }}>{selectedBar.location} • {selectedBar.distance}km</p>
-              <p style={{ fontSize: '12px', color: '#999', margin: '0 0 4px 0', fontWeight: '500' }}>📞 Téléphone</p>
-              <p style={{ fontSize: '13px', margin: '0 0 16px 0' }}><a href={`tel:${selectedBar.phone}`} style={{ color: COLORS.primary, textDecoration: 'none' }}>{selectedBar.phone}</a></p>
-              <p style={{ fontSize: '12px', color: '#999', margin: '0 0 4px 0', fontWeight: '500' }}>📧 Email</p>
-              <p style={{ fontSize: '13px', margin: '0 0 16px 0' }}><a href={`mailto:${selectedBar.email}`} style={{ color: COLORS.primary, textDecoration: 'none' }}>{selectedBar.email}</a></p>
-              <button onClick={() => toggleBarLike(selectedBar.id)} style={{ width: '100%', padding: '12px', backgroundColor: barLikes[selectedBar.id] ? COLORS.primary : '#f5f5f5', color: barLikes[selectedBar.id] ? 'white' : '#666', fontWeight: '600', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px' }}>
-                {barLikes[selectedBar.id] ? '❤️ J\'aime (' + (barLikeCount[selectedBar.id] || 0) + ')' : '🤍 J\'aime (' + (barLikeCount[selectedBar.id] || 0) + ')'}
-              </button>
-            </div>
-            <button onClick={closeModal} style={{ width: '100%', padding: '12px', backgroundColor: COLORS.primary, color: 'white', fontWeight: '600', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}>Fermer</button>
-          </div>
-        </div>
-      )}
-
-      {/* OFFER MODAL */}
-      {selectedPost && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'flex-end', zIndex: 1000 }} onClick={closeModal}>
-          <div style={{ backgroundColor: '#ffffff', borderRadius: '16px 16px 0 0', padding: '24px', width: '100%', maxHeight: '90vh', overflow: 'auto' }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-              <h2 style={{ fontSize: '16px', fontWeight: '700', margin: 0, color: '#1a1a1a' }}>✨ Offre Spéciale</h2>
-              <button onClick={closeModal} style={{ backgroundColor: 'transparent', color: '#666', border: 'none', cursor: 'pointer', fontSize: '24px', padding: 0 }}>✕</button>
-            </div>
-            {selectedPost.isSpecialOffer ? (
-              <div>
-                <h3 style={{ fontSize: '18px', fontWeight: '600', color: COLORS.primary, margin: '0 0 12px 0', lineHeight: '1.4' }}>{selectedPost.offerTitle}</h3>
-                <p style={{ fontSize: '14px', color: '#666', margin: '0 0 24px 0', lineHeight: '1.6', paddingBottom: '16px', borderBottom: '1px solid #e0e0e0' }}>{selectedPost.offerSubDesc}</p>
-                <div style={{ backgroundColor: '#f9f9f9', padding: '16px', borderRadius: '8px', marginBottom: '24px', textAlign: 'center', fontSize: '13px', color: '#1a1a1a' }}>
-                  <p style={{ margin: '0 0 8px 0', fontWeight: '500' }}>🎁 Demande le code à ton commerçant</p>
-                  <p style={{ margin: 0, color: '#666' }}>pour profiter de l'offre!</p>
-                </div>
-                <div style={{ marginBottom: '24px' }}>
-                  <label style={{ fontSize: '12px', color: '#999', display: 'block', marginBottom: '12px', fontWeight: '500' }}>Code 🔐</label>
-                  <div style={{ width: '100%', padding: '16px', fontSize: '32px', textAlign: 'center', backgroundColor: '#f9f9f9', color: isCodeCorrect ? '#00aa00' : COLORS.primary, border: '1px solid ' + (isCodeCorrect ? '#00aa00' : '#e0e0e0'), borderRadius: '8px', letterSpacing: '12px', fontWeight: 'bold', marginBottom: '16px', minHeight: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {codeInput.split('').map((digit, i) => <span key={i} style={{ display: 'inline-block', width: '30px' }}>{digit ? '●' : '○'}</span>)}
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', marginBottom: '16px' }}>
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-                      <button key={num} onClick={() => codeInput.length < 4 && setCodeInput(codeInput + num)} style={{ padding: '10px', fontSize: '14px', fontWeight: '600', backgroundColor: '#f0f0f0', color: '#1a1a1a', border: '1px solid #e0e0e0', borderRadius: '6px', cursor: 'pointer' }}>
-                        {num}
-                      </button>
-                    ))}
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', marginBottom: '16px' }}>
-                    <button onClick={() => codeInput.length < 4 && setCodeInput(codeInput + '0')} style={{ padding: '10px', fontSize: '14px', fontWeight: '600', backgroundColor: '#f0f0f0', color: '#1a1a1a', border: '1px solid #e0e0e0', borderRadius: '6px', cursor: 'pointer' }}>0</button>
-                    <div></div>
-                    <button onClick={() => setCodeInput(codeInput.slice(0, -1))} style={{ padding: '10px', fontSize: '14px', fontWeight: '600', backgroundColor: COLORS.primary, color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>⌫</button>
-                  </div>
-                </div>
-                <button onClick={completeOffer} disabled={!isCodeCorrect} style={{ width: '100%', padding: '14px', backgroundColor: isCodeCorrect ? COLORS.primary : '#e0e0e0', color: isCodeCorrect ? 'white' : '#999', fontWeight: '600', border: 'none', borderRadius: '8px', cursor: isCodeCorrect ? 'pointer' : 'not-allowed', fontSize: '14px' }}>
-                  {isCodeCorrect ? '✅ Valide ton offre (+25 pts)' : 'Valide ton offre'}
-                </button>
-              </div>
-            ) : (
-              <div>
-                <p style={{ fontSize: '12px', color: '#999', margin: '0 0 8px 0' }}>Établissement</p>
-                <p style={{ fontSize: '14px', fontWeight: '600', color: COLORS.primary, margin: '0 0 16px 0' }}>{selectedPost.bar.name}</p>
-                <p style={{ fontSize: '12px', color: '#999', margin: '0 0 8px 0' }}>Offre</p>
-                <p style={{ fontSize: '13px', color: '#1a1a1a', margin: 0 }}>{selectedPost.description}</p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* CELEBRATION */}
-      {showCelebration && (
-        <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 2000 }}>
-          {[...Array(30)].map((_, i) => (
-            <div key={`confetti-${i}`} className="confetti" style={{ left: `${Math.random() * 100}%`, top: '-10px', width: '10px', height: '10px', backgroundColor: ['FF6B35', 'FFD700', '00aa00', 'FF1493', '00CED1'][i % 5], borderRadius: Math.random() > 0.5 ? '50%' : '2px', animationDelay: `${i * 0.05}s` }} />
+      {/* BOTTOM TABS */}
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#ffffff', borderTop: '1px solid #e0e0e0', maxWidth: '500px', margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', padding: '8px 0' }}>
+          {[
+            { id: 'now', emoji: '⚡', label: 'Now' },
+            { id: 'explore', emoji: '🗺️', label: 'Explore' },
+            { id: 'featured', emoji: '⭐', label: 'À la une' },
+            { id: 'profile', emoji: '👤', label: 'Profil' }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                backgroundColor: activeTab === tab.id ? COLORS.primary : 'transparent',
+                color: activeTab === tab.id ? 'white' : '#999',
+                border: 'none',
+                padding: '8px 0',
+                cursor: 'pointer',
+                fontSize: '10px',
+                fontWeight: '600',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '4px',
+                borderRadius: '8px 8px 0 0',
+                transition: 'all 0.2s'
+              }}
+            >
+              <span style={{ fontSize: '18px' }}>{tab.emoji}</span>
+              {tab.label}
+            </button>
           ))}
-          <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: COLORS.primary, color: 'white', padding: '24px 48px', borderRadius: '12px', fontSize: '18px', fontWeight: '700', textAlign: 'center', zIndex: 2001, boxShadow: '0 10px 40px rgba(255, 107, 53, 0.4)', animation: 'fadeInScale 0.5s ease-out' }}>
-            ✅ Tu as gagné 25 points!
-          </div>
         </div>
-      )}
-
-      {/* BOTTOM NAV */}
-      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#ffffff', borderTop: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-around', zIndex: 100 }}>
-        {[
-          { id: 'now', emoji: '⚡', label: 'Now' },
-          { id: 'explore', emoji: '🗺️', label: 'Explore' },
-          { id: 'featured', emoji: '⭐', label: 'À la une' },
-          { id: 'profile', emoji: '👤', label: 'Profil' }
-        ].map(tab => (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: '16px', textAlign: 'center', color: activeTab === tab.id ? COLORS.primary : '#999', backgroundColor: 'transparent', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: '600', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-            <span style={{ fontSize: '20px' }}>{tab.emoji}</span>
-            {tab.label}
-          </button>
-        ))}
       </div>
     </div>
   )
