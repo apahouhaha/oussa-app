@@ -24,7 +24,7 @@ const BAR_COORDS: Record<number, [number, number]> = {
 }
 
 export function ExploreTab({ filteredBars, likes, likeCount, onLike, onBarClick }: ExploreTabProps) {
-  const [sheetOpen, setSheetOpen] = useState(true)  // START OPEN
+  const [sheetOpen, setSheetOpen] = useState(false)
   const [selectedBarOnMap, setSelectedBarOnMap] = useState<typeof BARS[0] | null>(null)
   const [selectedFilters, setSelectedFilters] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState('')
@@ -167,7 +167,7 @@ export function ExploreTab({ filteredBars, likes, likeCount, onLike, onBarClick 
       <div
         ref={mapContainerRef}
         style={{
-          flex: sheetOpen ? '0 0 40%' : '1',
+          flex: sheetOpen ? '0 0 30%' : '1',
           position: 'relative',
           transition: 'flex 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
           overflow: 'hidden',
@@ -320,7 +320,7 @@ export function ExploreTab({ filteredBars, likes, likeCount, onLike, onBarClick 
 
       {/* BOTTOM SHEET - use maxHeight to respect parent constraints */}
       <div style={{
-        maxHeight: sheetOpen ? '70vh' : '60px',
+        maxHeight: sheetOpen ? '65vh' : '60px',
         flex: sheetOpen ? '0 0 auto' : '0 0 60px',
         backgroundColor: '#ffffff',
         borderRadius: sheetOpen ? '0' : '20px 20px 0 0',
@@ -374,13 +374,13 @@ export function ExploreTab({ filteredBars, likes, likeCount, onLike, onBarClick 
               <button
                 onClick={() => setSelectedCategory(null)}
                 style={{
-                  padding: '6px 10px',
+                  padding: '10px 14px',
                   backgroundColor: selectedCategory === null ? COLORS.primary : '#ffffff',
                   color: selectedCategory === null ? 'white' : '#333',
                   border: selectedCategory === null ? `2px solid ${COLORS.primary}` : '2px solid #ddd',
-                  borderRadius: '6px',
+                  borderRadius: '8px',
                   cursor: 'pointer',
-                  fontSize: '12px',
+                  fontSize: '13px',
                   fontWeight: '600',
                   whiteSpace: 'nowrap',
                   transition: 'all 0.2s'
@@ -409,18 +409,18 @@ export function ExploreTab({ filteredBars, likes, likeCount, onLike, onBarClick 
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
                   style={{
-                    padding: '6px 10px',
+                    padding: '10px 14px',
                     backgroundColor: selectedCategory === cat.id ? COLORS.primary : '#ffffff',
                     color: selectedCategory === cat.id ? 'white' : '#333',
                     border: selectedCategory === cat.id ? `2px solid ${COLORS.primary}` : '2px solid #ddd',
-                    borderRadius: '6px',
+                    borderRadius: '8px',
                     cursor: 'pointer',
-                    fontSize: '12px',
+                    fontSize: '13px',
                     fontWeight: '600',
                     whiteSpace: 'nowrap',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '4px',
+                    gap: '6px',
                     transition: 'all 0.2s'
                   }}
                   onMouseEnter={(e) => {
@@ -448,18 +448,18 @@ export function ExploreTab({ filteredBars, likes, likeCount, onLike, onBarClick 
                   key={f.id}
                   onClick={() => setSelectedFilters(prev => prev.includes(f.id) ? prev.filter(x => x !== f.id) : [...prev, f.id])}
                   style={{
-                    padding: '6px 10px',
+                    padding: '10px 14px',
                     backgroundColor: selectedFilters.includes(f.id) ? COLORS.primary : '#ffffff',
                     color: selectedFilters.includes(f.id) ? 'white' : '#333',
                     border: selectedFilters.includes(f.id) ? `2px solid ${COLORS.primary}` : '2px solid #ddd',
-                    borderRadius: '6px',
+                    borderRadius: '8px',
                     cursor: 'pointer',
-                    fontSize: '12px',
+                    fontSize: '13px',
                     fontWeight: '600',
                     whiteSpace: 'nowrap',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '4px',
+                    gap: '6px',
                     transition: 'all 0.2s'
                   }}
                   onMouseEnter={(e) => {
