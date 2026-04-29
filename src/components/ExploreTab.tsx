@@ -357,58 +357,109 @@ export function ExploreTab({ filteredBars, likes, likeCount, onLike, onBarClick 
               <button
                 onClick={() => setSelectedCategory(null)}
                 style={{
-                  padding: '6px 12px',
-                  backgroundColor: selectedCategory === null ? COLORS.primary : '#f5f5f5',
-                  color: selectedCategory === null ? 'white' : '#666',
-                  border: 'none',
-                  borderRadius: '6px',
+                  padding: '10px 14px',
+                  backgroundColor: selectedCategory === null ? COLORS.primary : '#ffffff',
+                  color: selectedCategory === null ? 'white' : '#333',
+                  border: selectedCategory === null ? `2px solid ${COLORS.primary}` : '2px solid #ddd',
+                  borderRadius: '8px',
                   cursor: 'pointer',
-                  fontSize: '12px',
+                  fontSize: '13px',
                   fontWeight: '600',
-                  whiteSpace: 'nowrap'
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  if (selectedCategory !== null) {
+                    e.currentTarget.style.backgroundColor = '#f0f0f0'
+                    e.currentTarget.style.borderColor = '#999'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (selectedCategory !== null) {
+                    e.currentTarget.style.backgroundColor = '#ffffff'
+                    e.currentTarget.style.borderColor = '#ddd'
+                  }
                 }}
               >
                 Tous
               </button>
-              {['bars', 'restos', 'clubs'].map(cat => (
+              {[
+                { id: 'bars', emoji: '🍻', label: 'Bars' },
+                { id: 'restos', emoji: '🍽️', label: 'Restos' },
+                { id: 'clubs', emoji: '🎵', label: 'Clubs' }
+              ].map(cat => (
                 <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
                   style={{
-                    padding: '6px 12px',
-                    backgroundColor: selectedCategory === cat ? COLORS.primary : '#f5f5f5',
-                    color: selectedCategory === cat ? 'white' : '#666',
-                    border: 'none',
-                    borderRadius: '6px',
+                    padding: '10px 14px',
+                    backgroundColor: selectedCategory === cat.id ? COLORS.primary : '#ffffff',
+                    color: selectedCategory === cat.id ? 'white' : '#333',
+                    border: selectedCategory === cat.id ? `2px solid ${COLORS.primary}` : '2px solid #ddd',
+                    borderRadius: '8px',
                     cursor: 'pointer',
-                    fontSize: '12px',
+                    fontSize: '13px',
                     fontWeight: '600',
-                    whiteSpace: 'nowrap'
+                    whiteSpace: 'nowrap',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedCategory !== cat.id) {
+                      e.currentTarget.style.backgroundColor = '#f0f0f0'
+                      e.currentTarget.style.borderColor = '#999'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedCategory !== cat.id) {
+                      e.currentTarget.style.backgroundColor = '#ffffff'
+                      e.currentTarget.style.borderColor = '#ddd'
+                    }
                   }}
                 >
-                  {cat === 'bars' ? '🍻' : cat === 'restos' ? '🍽️' : '🎵'}
+                  <span>{cat.emoji}</span>
+                  <span>{cat.label}</span>
                 </button>
               ))}
             </div>
 
-            <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', marginBottom: '16px' }}>
-              {FILTERS.slice(0, 5).map(f => (
+            <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', marginBottom: '16px', flexWrap: 'wrap' }}>
+              {FILTERS.map(f => (
                 <button
                   key={f.id}
                   onClick={() => setSelectedFilters(prev => prev.includes(f.id) ? prev.filter(x => x !== f.id) : [...prev, f.id])}
                   style={{
-                    padding: '6px 10px',
-                    backgroundColor: selectedFilters.includes(f.id) ? COLORS.primary : '#f5f5f5',
-                    color: selectedFilters.includes(f.id) ? 'white' : '#999',
-                    border: 'none',
-                    borderRadius: '6px',
+                    padding: '10px 14px',
+                    backgroundColor: selectedFilters.includes(f.id) ? COLORS.primary : '#ffffff',
+                    color: selectedFilters.includes(f.id) ? 'white' : '#333',
+                    border: selectedFilters.includes(f.id) ? `2px solid ${COLORS.primary}` : '2px solid #ddd',
+                    borderRadius: '8px',
                     cursor: 'pointer',
-                    fontSize: '11px',
+                    fontSize: '13px',
                     fontWeight: '600',
-                    whiteSpace: 'nowrap'
+                    whiteSpace: 'nowrap',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!selectedFilters.includes(f.id)) {
+                      e.currentTarget.style.backgroundColor = '#f0f0f0'
+                      e.currentTarget.style.borderColor = '#999'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!selectedFilters.includes(f.id)) {
+                      e.currentTarget.style.backgroundColor = '#ffffff'
+                      e.currentTarget.style.borderColor = '#ddd'
+                    }
                   }}
                 >
-                  {f.emoji}
+                  <span>{f.emoji}</span>
+                  <span>{f.label}</span>
                 </button>
               ))}
             </div>
