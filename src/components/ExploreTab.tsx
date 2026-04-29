@@ -210,20 +210,35 @@ export function ExploreTab({ filteredBars, likes, likeCount, onLike, onBarClick 
 
       {/* Mini card - always visible in first plane */}
       {selectedBarOnMap && (
-        <div style={{
-          position: 'fixed',
-          bottom: '100px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          backgroundColor: '#ffffff',
-          borderRadius: '12px',
-          padding: '14px',
-          width: '88%',
-          maxWidth: '300px',
-          boxShadow: '0 6px 20px rgba(0, 0, 0, 0.12)',
-          zIndex: 9998,
-          animation: 'slideUp 0.3s ease-out'
-        }}>
+        <>
+          {/* Overlay to close when clicking outside */}
+          <div
+            onClick={() => setSelectedBarOnMap(null)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              backgroundColor: 'transparent',
+              zIndex: 9997,
+              cursor: 'pointer'
+            }}
+          />
+          
+          {/* Mini card */}
+          <div style={{
+            position: 'fixed',
+            bottom: '100px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            backgroundColor: '#ffffff',
+            borderRadius: '12px',
+            padding: '14px',
+            width: '88%',
+            maxWidth: '300px',
+            boxShadow: '0 6px 20px rgba(0, 0, 0, 0.12)',
+            zIndex: 9998,
+            animation: 'slideUp 0.3s ease-out',
+            pointerEvents: 'auto'
+          }}>
           <button
             onClick={() => setSelectedBarOnMap(null)}
             style={{
@@ -300,6 +315,7 @@ export function ExploreTab({ filteredBars, likes, likeCount, onLike, onBarClick 
             </button>
           </div>
         </div>
+        </>
       )}
 
       {/* BOTTOM SHEET - use maxHeight to respect parent constraints */}
@@ -320,18 +336,19 @@ export function ExploreTab({ filteredBars, likes, likeCount, onLike, onBarClick 
           onTouchEnd={handleTouchEnd}
           onClick={() => setSheetOpen(!sheetOpen)}
           style={{
-            padding: '12px 0',
-            backgroundColor: 'transparent',
+            padding: '16px 0',
+            backgroundColor: '#f9f9f9',
             cursor: 'grab',
             userSelect: 'none',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
-            touchAction: 'none'
+            touchAction: 'none',
+            borderBottom: '1px solid #e0e0e0'
           }}
         >
-          <div style={{ width: '36px', height: '3px', backgroundColor: '#d0d0d0', borderRadius: '2px' }} />
+          <div style={{ width: '48px', height: '4px', backgroundColor: '#999', borderRadius: '2px' }} />
         </div>
 
         {/* CONTENT */}
