@@ -31,6 +31,15 @@ export function ExploreTab({ filteredBars, likes, onLike, onBarClick }: any) {
   const [isScrollable, setIsScrollable] = useState(false)
   const [selectedBar, setSelectedBar] = useState<any>(null)
   
+  // Toggle filter function
+  const toggleFilter = (filterId: string) => {
+    setSelectedFilters(prev =>
+      prev.includes(filterId)
+        ? prev.filter(id => id !== filterId)
+        : [...prev, filterId]
+    )
+  }
+  
   const mapRef = useRef<google.maps.Map | null>(null)
   const markersRef = useRef<google.maps.Marker[]>([])
   const userMarkerRef = useRef<google.maps.Marker | null>(null)
@@ -402,7 +411,6 @@ export function ExploreTab({ filteredBars, likes, onLike, onBarClick }: any) {
               ].map(cat => (
                 <button
                   key={cat.id}
-                  onPointerDown={(e) => e.stopPropagation()}
                   onClick={(e) => {
                     e.stopPropagation()
                     setSelectedCategory(selectedCategory === cat.id ? null : cat.id)
@@ -444,7 +452,6 @@ export function ExploreTab({ filteredBars, likes, onLike, onBarClick }: any) {
               {FILTERS.map(filter => (
                 <button
                   key={filter.id}
-                  onPointerDown={(e) => e.stopPropagation()}
                   onClick={(e) => {
                     e.stopPropagation()
                     toggleFilter(filter.id)
