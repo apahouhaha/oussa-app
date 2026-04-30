@@ -317,14 +317,6 @@ export default function App() {
 
       {/* MAIN CONTENT */}
       <div style={{ maxWidth: '500px', margin: '0 auto' }}>
-        {/* HEADER */}
-        <div style={{ backgroundColor: '#ffffff', padding: '12px 24px', borderBottom: '1px solid #e0e0e0', position: 'sticky', top: 0, zIndex: 100 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h1 style={{ margin: 0, fontSize: '18px', fontWeight: '700' }}>OUSSA</h1>
-            <span style={{ fontSize: '24px' }}>📍</span>
-          </div>
-        </div>
-
       {/* FLOATING BUTTONS - NOW TAB */}
         {activeTab === 'now' && (
           <div style={{ padding: '12px 24px', borderBottom: '1px solid #e0e0e0' }}>
@@ -502,7 +494,7 @@ export default function App() {
       </div>
 
       {/* BOTTOM TABS */}
-      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#ffffff', borderTop: '1px solid #e0e0e0', maxWidth: '500px', margin: '0 auto' }}>
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#ffffff', borderTop: '1px solid #e0e0e0', maxWidth: '500px', margin: '0 auto', zIndex: 100 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', padding: '8px 0' }}>
           {[
             { id: 'now', emoji: '⚡', label: 'Now' },
