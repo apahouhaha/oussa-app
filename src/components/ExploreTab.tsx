@@ -17,11 +17,10 @@ export function ExploreTab({ filteredBars, likes, onLike, onBarClick }: any) {
   const windowHeightRef = useRef(window.innerHeight)
 
   // Calculate snap points in pixels FIRST (before state)
-  // Calculate snap points - 3 points: closed (map), filters (between), open (list)
+  // Calculate snap points - 2 points only: closed (map) and open (list)
   const snapPointsPixels = {
     closed: -110,                                  // Bottom - map view
-    filters: -300,                                 // Middle - show filters only (no list)
-    open: -(windowHeightRef.current - 40)         // Top - list view (leaving only 40px for handle visibility instead of 60px)
+    open: -(windowHeightRef.current - 40)         // Top - list view (leaving only 40px for handle visibility)
   }
 
   const [searchTerm, setSearchTerm] = useState('')
@@ -40,7 +39,10 @@ export function ExploreTab({ filteredBars, likes, onLike, onBarClick }: any) {
   const barsToDisplay = (filteredBars || BARS).filter((bar: any) => {
     if (selectedCategory && bar.category !== selectedCategory) return false
     if (searchTerm && !bar.name.toLowerCase().includes(searchTerm.toLowerCase())) return false
-    if (selectedFilters.length > 0 && !selectedFilters.every(f => bar.filters.includes(f))) return false
+    if (selectedFilters.length > 0) {
+      const hasAll = selectedFilters.every(fId => bar.filters?.includes(fId))
+      if (!hasAll) return false
+    }
     return true
   }).sort((a: any, b: any) => a.distance - b.distance)
 
@@ -54,11 +56,8 @@ export function ExploreTab({ filteredBars, likes, onLike, onBarClick }: any) {
       )
       
       if (foundBar && mapRef.current) {
-        // Centrer la map sur le commerce trouvé (avec offset aléatoire)
-        const offsetLat = 50.6844 + (Math.random() - 0.5) * 0.08
-        const offsetLng = 3.1556 + (Math.random() - 0.5) * 0.08
-        
-        mapRef.current.panTo({ lat: offsetLat, lng: offsetLng })
+        // Centrer la map sur le commerce trouvé SANS offset aléatoire
+        mapRef.current.panTo({ lat: 50.6844, lng: 3.1556 })
         mapRef.current.setZoom(16)
       }
     }
@@ -66,7 +65,7 @@ export function ExploreTab({ filteredBars, likes, onLike, onBarClick }: any) {
 
   // Find nearest snap point - 3 points now
   const getClosestSnapPoint = (currentY: number) => {
-    const points = [snapPointsPixels.closed, snapPointsPixels.filters, snapPointsPixels.open]
+    const points = [snapPointsPixels.closed, snapPointsPixels.open]
     return points.reduce((prev, curr) =>
       Math.abs(curr - currentY) < Math.abs(prev - currentY) ? curr : prev
     )
@@ -137,15 +136,14 @@ export function ExploreTab({ filteredBars, likes, onLike, onBarClick }: any) {
     markersRef.current = []
 
     barsToDisplay.forEach((bar: any) => {
-      // Slight random offset for demo
-      const offsetLat = 50.6844 + (Math.random() - 0.5) * 0.08
-      const offsetLng = 3.1556 + (Math.random() - 0.5) * 0.08
+      // Use each bar's own coordinates for stability
+      const position = { lat: bar.lat || 50.6844, lng: bar.lng || 3.1556 }
 
       // Simple emoji marker in SVG
       const markerSVG = `data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"%3E%3Ccircle cx="20" cy="20" r="18" fill="white" stroke="%234285F4" stroke-width="2"/%3E%3Ctext x="20" y="26" text-anchor="middle" font-size="18"%3E${bar.emoji}%3C/text%3E%3C/svg%3E`
 
       const marker = new google.maps.Marker({
-        position: { lat: offsetLat, lng: offsetLng },
+        position: position,
         map: mapRef.current,
         title: bar.name,
         icon: markerSVG
@@ -183,7 +181,7 @@ export function ExploreTab({ filteredBars, likes, onLike, onBarClick }: any) {
       {/* FLOATING FILTERS BUTTON - Correct style with bars and circles */}
       <button
         onClick={() => {
-          setPanelY(snapPointsPixels.filters)
+          setPanelY(snapPointsPixels.open)
           setIsScrollable(false)
         }}
         style={{
@@ -331,7 +329,7 @@ export function ExploreTab({ filteredBars, likes, onLike, onBarClick }: any) {
               onChange={(e) => handleSearch(e.target.value)}
               onFocus={() => {
                 // Quand on clique sur la recherche, descendre le panel pour laisser place au clavier
-                setPanelY(snapPointsPixels.filters)
+                setPanelY(snapPointsPixels.open)
               }}
               style={{
                 flex: 1,
@@ -381,7 +379,19 @@ export function ExploreTab({ filteredBars, likes, onLike, onBarClick }: any) {
           </div>
 
           {/* CATEGORIES */}
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e0e0e0', overflowX: 'auto', flexShrink: 0, display: searchTerm ? 'none' : 'block' }}>
+          <div style={{ 
+            padding: '12px 16px', 
+            borderBottom: '1px solid #e0e0e0', 
+            overflowX: 'auto', 
+            flexShrink: 0,
+            opacity: searchTerm ? 0 : 1,
+            height: searchTerm ? 0 : 'auto',
+            overflow: searchTerm ? 'hidden' : 'visible',
+            transition: 'all 0.2s ease',
+            zIndex: 50,
+            position: 'relative',
+            pointerEvents: searchTerm ? 'none' : 'auto'
+          }}>
             <div style={{ display: 'flex', gap: '8px', minWidth: 'min-content' }}>
               {[
                 { id: 'bars', emoji: '🍻', label: 'Bars' },
@@ -392,7 +402,11 @@ export function ExploreTab({ filteredBars, likes, onLike, onBarClick }: any) {
               ].map(cat => (
                 <button
                   key={cat.id}
-                  onClick={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setSelectedCategory(selectedCategory === cat.id ? null : cat.id)
+                  }}
                   style={{
                     padding: '8px 12px',
                     backgroundColor: selectedCategory === cat.id ? COLORS.primary : '#f0f0f0',
@@ -412,12 +426,29 @@ export function ExploreTab({ filteredBars, likes, onLike, onBarClick }: any) {
           </div>
 
           {/* FILTERS - Allow horizontal scroll without triggering vertical drag */}
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e0e0e0', overflowX: 'auto', flexShrink: 0, touchAction: 'pan-x', display: searchTerm ? 'none' : 'block' }}>
+          <div style={{ 
+            padding: '12px 16px', 
+            borderBottom: '1px solid #e0e0e0', 
+            overflowX: 'auto', 
+            flexShrink: 0, 
+            touchAction: 'pan-x',
+            opacity: searchTerm ? 0 : 1,
+            height: searchTerm ? 0 : 'auto',
+            overflow: searchTerm ? 'hidden' : 'visible',
+            transition: 'all 0.2s ease',
+            pointerEvents: searchTerm ? 'none' : 'auto',
+            zIndex: 50,
+            position: 'relative'
+          }}>
             <div style={{ display: 'flex', gap: '6px', minWidth: 'min-content' }}>
               {FILTERS.map(filter => (
                 <button
                   key={filter.id}
-                  onClick={() => toggleFilter(filter.id)}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    toggleFilter(filter.id)
+                  }}
                   style={{
                     padding: '6px 10px',
                     backgroundColor: selectedFilters.includes(filter.id) ? COLORS.primary : '#f0f0f0',
