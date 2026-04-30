@@ -44,10 +44,30 @@ export function ExploreTab({ filteredBars, likes, onLike, onBarClick }: any) {
     return true
   }).sort((a: any, b: any) => a.distance - b.distance)
 
-  const toggleFilter = (filterId: string) => {
-    setSelectedFilters(prev =>
-      prev.includes(filterId) ? prev.filter(f => f !== filterId) : [...prev, filterId]
-    )
+  const handleSearch = (term: string) => {
+    setSearchTerm(term)
+    
+    // Si un terme est entré, trouver le bar et centrer la carte
+    if (term.trim()) {
+      const foundBar = barsToDisplay.find(bar => 
+        bar.name.toLowerCase().includes(term.toLowerCase())
+      )
+      
+      if (foundBar && mapRef.current) {
+        // Centrer la map sur le commerce trouvé (avec offset aléatoire)
+        const offsetLat = 50.6844 + (Math.random() - 0.5) * 0.08
+        const offsetLng = 3.1556 + (Math.random() - 0.5) * 0.08
+        
+        mapRef.current.panTo({ lat: offsetLat, lng: offsetLng })
+        mapRef.current.setZoom(16)
+        
+        // Ouvrir la mini-fiche du commerce
+        setSelectedBar(foundBar)
+        
+        // Fermer le clavier (si sur mobile)
+        ;(document.activeElement as HTMLElement)?.blur()
+      }
+    }
   }
 
   // Find nearest snap point - 3 points now
@@ -314,7 +334,7 @@ export function ExploreTab({ filteredBars, likes, onLike, onBarClick }: any) {
               type="text"
               placeholder="Rechercher..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => handleSearch(e.target.value)}
               style={{
                 flex: 1,
                 padding: '12px',
@@ -322,7 +342,9 @@ export function ExploreTab({ filteredBars, likes, onLike, onBarClick }: any) {
                 border: '1px solid #e0e0e0',
                 borderRadius: '8px',
                 fontSize: '14px',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
+                color: '#1a1a1a',
+                fontWeight: '500'
               }}
             />
             <button
