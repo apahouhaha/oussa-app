@@ -489,16 +489,13 @@ export function ExploreTab({ filteredBars, likes, onLike, onBarClick }: any) {
           style={{
             position: 'fixed',
             bottom: '100px',
-            left: '50%',
-            right: 'auto',
-            transform: 'translateX(-50%)',
+            left: '20px',
+            right: '20px',
             backgroundColor: '#ffffff',
             borderRadius: '12px',
             padding: '16px',
             zIndex: 25,
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
-            maxWidth: 'calc(100vw - 40px)',
-            width: '340px',
             border: `2px solid ${COLORS.primary}`
           }}
         >
