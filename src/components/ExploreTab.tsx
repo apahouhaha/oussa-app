@@ -21,7 +21,7 @@ export function ExploreTab({ filteredBars, likes, onLike, onBarClick }: any) {
   const snapPointsPixels = {
     closed: -110,                                  // Bottom - map view
     filters: -300,                                 // Middle - show filters only (no list)
-    open: -(windowHeightRef.current - 60)         // Top - list view (leaving 60px for handle visibility)
+    open: -(windowHeightRef.current - 40)         // Top - list view (leaving only 40px for handle visibility instead of 60px)
   }
 
   const [searchTerm, setSearchTerm] = useState('')
@@ -47,7 +47,7 @@ export function ExploreTab({ filteredBars, likes, onLike, onBarClick }: any) {
   const handleSearch = (term: string) => {
     setSearchTerm(term)
     
-    // Si un terme est entré, trouver le bar et centrer la carte
+    // Si un terme est entré, trouver le bar et déplacer la carte
     if (term.trim()) {
       const foundBar = barsToDisplay.find(bar => 
         bar.name.toLowerCase().includes(term.toLowerCase())
@@ -60,12 +60,6 @@ export function ExploreTab({ filteredBars, likes, onLike, onBarClick }: any) {
         
         mapRef.current.panTo({ lat: offsetLat, lng: offsetLng })
         mapRef.current.setZoom(16)
-        
-        // Ouvrir la mini-fiche du commerce
-        setSelectedBar(foundBar)
-        
-        // Fermer le clavier (si sur mobile)
-        ;(document.activeElement as HTMLElement)?.blur()
       }
     }
   }
@@ -335,6 +329,10 @@ export function ExploreTab({ filteredBars, likes, onLike, onBarClick }: any) {
               placeholder="Rechercher..."
               value={searchTerm}
               onChange={(e) => handleSearch(e.target.value)}
+              onFocus={() => {
+                // Quand on clique sur la recherche, descendre le panel pour laisser place au clavier
+                setPanelY(snapPointsPixels.filters)
+              }}
               style={{
                 flex: 1,
                 padding: '12px',
@@ -383,7 +381,7 @@ export function ExploreTab({ filteredBars, likes, onLike, onBarClick }: any) {
           </div>
 
           {/* CATEGORIES */}
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e0e0e0', overflowX: 'auto', flexShrink: 0 }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e0e0e0', overflowX: 'auto', flexShrink: 0, display: searchTerm ? 'none' : 'block' }}>
             <div style={{ display: 'flex', gap: '8px', minWidth: 'min-content' }}>
               {[
                 { id: 'bars', emoji: '🍻', label: 'Bars' },
@@ -414,7 +412,7 @@ export function ExploreTab({ filteredBars, likes, onLike, onBarClick }: any) {
           </div>
 
           {/* FILTERS - Allow horizontal scroll without triggering vertical drag */}
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e0e0e0', overflowX: 'auto', flexShrink: 0, touchAction: 'pan-x' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e0e0e0', overflowX: 'auto', flexShrink: 0, touchAction: 'pan-x', display: searchTerm ? 'none' : 'block' }}>
             <div style={{ display: 'flex', gap: '6px', minWidth: 'min-content' }}>
               {FILTERS.map(filter => (
                 <button
